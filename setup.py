@@ -40,6 +40,7 @@ user=False
 prefix=sys.prefix
 if prefix == '/usr':
   user=True
+  prefix=None
 # else we have a venv
 
   
