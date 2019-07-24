@@ -37,6 +37,8 @@ Prerequisites
 
 Install :rocket:
 -------
+pip3 install jupyter  (if you don't have it already)
+
 git clone https://github.com/nilqed/jfricas.pip.git
 
 cd jfricas.pip 

@@ -35,6 +35,12 @@ setup(name=kernel_name,
 
 
 from jupyter_client.kernelspec import KernelSpecManager as KSM
+import sys
+user=False
+prefix=sys.prefix
+if prefix == '/usr':
+  user=True
+# else we have a venv
 
-print('\n *** Installing Jupyter kernel spec\n')
-KSM().install_kernel_spec(kernel_sdir, kernel_name, user=True, replace=True, prefix=prefix)
+  
+KSM().install_kernel_spec(kernel_sdir, kernel_name, user=user, replace=True, prefix=prefix)
