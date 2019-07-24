@@ -1,15 +1,20 @@
-Install
+Install :rocket:
 -------
-git clone https://github.com/nilqed/jfricas.git
-cd jfricas 
-./install.sh
+git clone https://github.com/nilqed/jfricas.pip.git
+cd jfricas.pip 
+pip3 install .
 
 
 Uninstall
 ---------
-cd jfricas
-./uninstall
+pip3 uninstall jfricas
+jupyter kernelspec remove jfricas
 
+
+ALL BELOW IS FOR https://github.com/nilqed/jfricas.git 
+:construction:
+
+This repo might be deleted soon !!
 
 Notes
 -----
