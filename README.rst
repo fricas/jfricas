@@ -1,13 +1,16 @@
 Install :rocket:
 -------
 git clone https://github.com/nilqed/jfricas.pip.git
+
 cd jfricas.pip 
+
 pip3 install .
 
 
 Uninstall
 ---------
 pip3 uninstall jfricas
+
 jupyter kernelspec remove jfricas
 
 
