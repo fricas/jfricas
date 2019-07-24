@@ -1,0 +1,3 @@
+include jfricas/webspad.lisp
+include LICENSE
+include README.rst
