@@ -20,7 +20,7 @@ For instance:
 	$ sudo apt install python3.6
 
 
-`Pip3`_ is required, of course (recommended version 9.0.1 or later)::
+`Pip3`_ is also required (recommended version 9.0.1 or later)::
 
         $ sudo apt install python3-pip
 
@@ -31,7 +31,7 @@ In order to load Common Lisp programs we require `ASDF`_ (v3.3 or later):
         $ sudo apt install cl-asdf
 
 
-The Hunchentoot webserver (v1.2.35 or later) will be installed by:
+The `Hunchentoot`_ webserver (v1.2.35 or later) will be installed by:
 ::
 
         $ sudo apt install cl-hunchentoot
@@ -46,19 +46,19 @@ Quick Install :rocket:
 Assuming the prerequisites are satisfied:
 ::
 
-	pip3 install jupyter  (if you don't have it already)
+	pip3 install jupyter
 	pip3 install jfricas
 
 
-**Detailed** installation instructions may be found in `INSTALL`.
+**Detailed** installation instructions may be found in `INSTALL`_.
 
 
-Install Development Version
+Install Development Version :construction:
 ---------------------------
 To install from this repository:
 ::
 
-	pip3 install jupyter  (if you don't have it already)
+	pip3 install jupyter
 	git clone https://github.com/fricas/jfricas.git
 	cd jfricas
 	pip3 install .
@@ -80,17 +80,17 @@ References
 +========================+============+==========+==================+
 | `FriCAS`_              | 1.3.2      | 1.3.5    | Deb/Ub (make)    |
 +------------------------+------------+----------+------------------+
-| `Python3`_             | 3.3        | 3.6      | Deb/Ub (apt)     |
+| `Python3`_             | 3.5        | 3.6      | Deb/Ub (apt)     |
 +------------------------+------------+----------+------------------+
 | `Pip3`_                | 9.0        | 9.0.1    | apt              |
 +------------------------+------------+----------+------------------+
-| `Jupyter`_             | 4.2        | 4.4      | pip3             |
+| `Jupyter`_             | 4.4        | 4.4      | pip3             |
 +------------------------+------------+----------+------------------+
 | `Requests`_            | 2.22.0     | 2.22.0   | pip3             |
 +------------------------+------------+----------+------------------+
 | `cl-asdf`_             | 3.3        | 3.3.1    | Deb/Ub (apt)     |
 +------------------------+------------+----------+------------------+
-| `cl-hunchentoot`_      | 1.2.15     | 1.2.35   | Deb/Ub (apt)     |
+| `cl-hunchentoot`_      | 1.2.35     | 1.2.35   | Deb/Ub (apt)     |
 +------------------------+------------+----------+------------------+
 
 
@@ -106,5 +106,13 @@ References
 .. _SBCL: http://sbcl.org/
 .. _ASDF: https://common-lisp.net/project/asdf/
 .. _Firefox: https://www.mozilla.org/en-US/
+.. _INSTALL: INSTALL
 
+:Authors:
+    Ralf Hemmecke,  
+    Kurt Pagani
+    
+    (and sundry other good-natured folks)
+
+:Version: 0.2 of 2019/07/25
 
