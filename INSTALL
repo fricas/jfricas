@@ -40,6 +40,7 @@ INSTALLATION INSTRUCTIONS
 
 A. Checking requirements
 B. References 
+C. Notes
 
 
 1 PREREQUISITES
@@ -304,3 +305,24 @@ B. REFERENCES
 +------------------------+------------+----------+------------------+
 |  cl-hunchentoot        | 1.2.15     | 1.2.35   | Deb/Ub (apt)     |
 +------------------------+------------+----------+------------------+
+
+
+C. NOTES 
+
+If jupyter is already in use and ::
+
+	$ jupyter kernelspec list
+
+shows `ifricas` as available kernel, then you have to remove it by ::
+
+	$ jupyter kernelspec remove ifricas
+
+because it has been registered with the same kernel name: `FriCAS`.
+Alternatively you may edit `kernel.json` of jfricas to use another name instead.
+*) ifricas was the name of the old LISP based kernel.
+
+Do not use ")quit" in consoles if you do not want to terminate the kernel. 
+Use <menu>/Quit instead (this will close the terminal window only).
+
+Command completion works as usual by pressing <TAB>. 
+
