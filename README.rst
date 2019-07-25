@@ -25,7 +25,7 @@ For instance:
         $ sudo apt install python3-pip
 
 
-In order to load Common Lisp programs we require ASDF (v3.3 or later):
+In order to load Common Lisp programs we require `ASDF`_ (v3.3 or later):
 ::
 
         $ sudo apt install cl-asdf
@@ -38,7 +38,7 @@ The Hunchentoot webserver (v1.2.35 or later) will be installed by:
 
 
 It is hardly worth to mention, a web-browser is required as well. We
-strongly recommend the latest Firefox.
+strongly recommend the latest `Firefox`_.
 
 
 Quick Install :rocket:
@@ -103,5 +103,8 @@ References
 .. _cl-hunchentoot: https://tracker.debian.org/pkg/hunchentoot
 .. _Hunchentoot: https://edicl.github.io/hunchentoot/
 .. _Common Lisp: https://en.wikipedia.org/wiki/Common_Lisp
+.. _SBCL: http://sbcl.org/
+.. _ASDF: https://common-lisp.net/project/asdf/
+.. _Firefox: https://www.mozilla.org/en-US/
 
 
