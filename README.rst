@@ -4,6 +4,73 @@ FriCAS Jupyter Kernel
 
 Prerequisites
 -------------
+The only supported OS at the moment is GNU/Linux - Debian/Ubuntu.
+
+For some other OS a docker image will be provided (soon).
+
+We require a version of FriCAS which was compiled with a Common Lisp that 
+supports multithreading and Hunchentoot. We recommend SBCL 1.4.5 or later.
+
+Since Python 2.7 will not be maintained past 2020, we will concentrate on
+Python3 (https://pythonclock.org/) only. We recommend Python 3.6 or later.
+For instance:
+::
+
+  	$ sudo apt update
+	$ sudo apt install python3.6
+
+
+Pip3 is required, of course (recommended version 9.0.1 or later)::
+
+        $ sudo apt install python3-pip
+
+
+In order to load Common Lisp programs we require ASDF (v3.3 or later):
+::
+
+        $ sudo apt install cl-asdf
+
+
+The Hunchentoot webserver (v1.2.35 or later) will be installed by:
+::
+
+        $ sudo apt install cl-hunchentoot
+
+
+It is hardly worth to mention, a web-browser is required as well. We
+strongly recommend the latest Firefox.
+
+
+Quick Install :rocket:
+-------------
+Assuming the prerequisites are satisfied:
+::
+
+	pip3 install jupyter  (if you don't have it already)
+	pip3 install jfricas
+
+
+Install Development Version
+---------------------------
+To install from this repository:
+::
+
+	pip3 install jupyter  (if you don't have it already)
+	git clone https://github.com/fricas/jfricas.git
+	cd jfricas
+	pip3 install .
+	
+
+Uninstall
+---------
+::
+
+	pip3 uninstall jfricas
+	jupyter kernelspec remove jfricas
+
+
+References
+----------
 
 +------------------------+------------+----------+------------------+
 | App / Versions, OS     | Min. ver.  | Tested   | OS/inst          |
@@ -32,25 +99,6 @@ Prerequisites
 .. _cl-asdf: https://tracker.debian.org/pkg/cl-asdf
 .. _cl-hunchentoot: https://tracker.debian.org/pkg/hunchentoot
 
-
-
-
-Install :rocket:
--------
-pip3 install jupyter  (if you don't have it already)
-
-git clone https://github.com/nilqed/jfricas.pip.git
-
-cd jfricas.pip 
-
-pip3 install .
-
-
-Uninstall
----------
-pip3 uninstall jfricas
-
-jupyter kernelspec remove jfricas
 
 
 ALL BELOW IS FOR https://github.com/nilqed/jfricas.git 
