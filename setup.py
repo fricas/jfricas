@@ -4,9 +4,9 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
-kernel_sdir = 'kspec'
+kernel_sdir = 'jfricas'
 kernel_name = 'jfricas'
-kernel_version = '0.2'
+kernel_version = '0.2.4'
 prefix = None
 
 setup(name=kernel_name,
