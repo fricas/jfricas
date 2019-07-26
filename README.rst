@@ -48,6 +48,7 @@ Assuming the prerequisites are satisfied:
 
 	pip3 install jupyter
 	pip3 install jfricas
+        python3 -m jfricas.install_kernel
 
 
 **Detailed** installation instructions may be found in `INSTALL`_.

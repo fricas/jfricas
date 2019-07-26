@@ -91,6 +91,7 @@ C. Notes
 
 	$ pip3 install jupyter
         $ pip3 install jfricas
+        $ python3 -m jfricas.install_kernel
 
   The 'request' library and the 'kernel.json' file will be installed 
   automatically by 'jfricas'.

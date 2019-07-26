@@ -6,7 +6,7 @@ def readme():
 
 kernel_sdir = 'jfricas/kspec'
 kernel_name = 'jfricas'
-kernel_version = '0.2.6'
+kernel_version = '0.2.7'
 prefix = None
 
 setup(name=kernel_name,
@@ -20,8 +20,8 @@ setup(name=kernel_name,
         'Operating System :: POSIX :: Linux',  
         'Topic :: Scientific/Engineering :: Mathematics',
       ],
-      keywords='fricas, jupyter, computer-algebra',
-      url='http://github.com/nilqed/jfricas.pip',
+      keywords='fricas, jupyter, computer_algebra',
+      url='http://github.com/fricas/jfricas.pip',
       author='Kurt Pagani',
       author_email='nilqed@gmail.com',
       license='BSD',

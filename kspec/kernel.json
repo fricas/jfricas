@@ -1,6 +1,0 @@
-{"argv": ["python3", "-m","jfricas.fricaskernel","-f", "{connection_file}"], 
-   "display_name": "FriCAS", "language": "spad"}
-
-
-
-

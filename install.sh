@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install kernel.json
-jupyter kernelspec install ./kspec --name='jfricas' --user
+jupyter kernelspec install ./jfricas/kspec --name='jfricas' --user
 jupyter kernelspec list
 
 # Search for Python user site 
