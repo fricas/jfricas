@@ -6,13 +6,14 @@ def readme():
 
 kernel_sdir = 'jfricas/kspec'
 kernel_name = 'jfricas'
-kernel_version = '0.2.7'
+kernel_version = '0.2.8'
 prefix = None
+ldescr = readme()
 
 setup(name=kernel_name,
       version=kernel_version,
       description='FriCAS Jupyter Kernel.',
-      long_description='FriCAS Jupyter Kernel (HTTP, X11).',
+      long_description=ldescr,
       classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',
@@ -21,8 +22,8 @@ setup(name=kernel_name,
         'Topic :: Scientific/Engineering :: Mathematics',
       ],
       keywords='fricas, jupyter, computer_algebra',
-      url='http://github.com/fricas/jfricas.pip',
-      author='Kurt Pagani',
+      url='http://github.com/fricas/jfricas',
+      author='Kurt Pagani, Ralf Hemmecke',
       author_email='nilqed@gmail.com',
       license='BSD',
       packages=['jfricas'],
