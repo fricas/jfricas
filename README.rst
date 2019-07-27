@@ -2,6 +2,11 @@
 FriCAS Jupyter Kernel 
 =====================
 
+**jfricas** installs a jupyter kernel that makes the computer algebra
+system FriCAS available in a jupyter notebook via a small webserver.
+For detailed installation instructions see `INSTALL`_.
+
+
 Prerequisites
 -------------
 The only supported OS at the moment is GNU/Linux - Debian/Ubuntu.
