@@ -1,7 +1,7 @@
 from setuptools import setup
 
 def readme():
-    with open('README.rst') as f:
+    with open('READMEPyPI.rst') as f:
         return f.read()
 
 kernel_sdir = 'jfricas/kspec'
