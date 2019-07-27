@@ -107,7 +107,7 @@ References
 .. _SBCL: http://sbcl.org/
 .. _ASDF: https://common-lisp.net/project/asdf/
 .. _Firefox: https://www.mozilla.org/en-US/
-.. _INSTALL: INSTALL
+.. _INSTALL: https://github.com/fricas/jfricas/blob/master/INSTALL
 
 :Authors:
     Ralf Hemmecke,  
