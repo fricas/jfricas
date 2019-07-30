@@ -1,12 +1,12 @@
 from setuptools import setup
 
 def readme():
-    with open('READMEPyPI.rst') as f:
+    with open('README.rst') as f:
         return f.read()
 
 kernel_sdir = 'jfricas/kspec'
 kernel_name = 'jfricas'
-kernel_version = '0.2.8'
+kernel_version = '0.2.9'
 prefix = None
 ldescr = readme()
 
@@ -14,6 +14,7 @@ setup(name=kernel_name,
       version=kernel_version,
       description='FriCAS Jupyter Kernel.',
       long_description=ldescr,
+      long_description_content_type='text/x-rst',
       classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: BSD License',

@@ -10,6 +10,8 @@
 # 23-JUL-2019 ........ Added global pid (process id of fricas+HT)
 #             ........ do_shutdown: self.server.put(")quit")
 #                      pid.terminate() # terminate fricas+HT
+# 30-JUL-2019 ........ restart=False in do_shutdown
+#             ........ Language: spad (removed SPAD).
 #
 
 from ipykernel.kernelbase import Kernel
@@ -23,8 +25,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.1.5' # 23-JUL-2019
-__authorm__ = '<nilqed@gmail.com>'
+__version__ = '0.2.8'
 
 
 def get_open_port():
@@ -61,13 +62,13 @@ class httpSPAD():
         
 
 class SPAD(Kernel):
-    implementation = 'SPAD'
+    implementation = 'spad'
     implementation_version = __version__
-    language = 'SPAD'
+    language = 'spad'
     language_version = '0.1'
-    language_info = {'name': 'SPAD', 'mimetype': 'text/plain',
+    language_info = {'name': 'spad', 'mimetype': 'text/plain',
                      'file_extension': '.input',}
-    banner = "FriCAS Jupyter Kernel (HTTP)"
+    banner = "FriCAS Jupyter Kernel"
     
     
     def __init__(self, **kwargs):
@@ -168,19 +169,21 @@ class SPAD(Kernel):
         output = "-- Bye. Kernel shutdown "
         stream_content = {'name': 'stdout', 'text': output}
         self.send_response(self.iopub_socket, 'stream', stream_content)
-        self.server.put(")quit")
-        pid.terminate() # terminate fricas+HT
+        try:
+            r = self.server.put(")quit")
+            pid.terminate() # terminate fricas+HT
         #self.app.stop()
-        return {'restart': restart}
+        except:
+            print("Go down anyway ...")
+        return {'restart': False}
         
 
 
 
 # Here’s the Kernel spec kernel.json file for this:
 #
-# {"argv":["python3","-m","fricaskernel", "-f", "{connection_file}"],
-#  "display_name":"FriCAS"
-# }
+# {"argv": ["python3", "-m","jfricas.fricaskernel","-f", "{connection_file}"],
+#   "display_name": "FriCAS", "language": "spad"}
 #    
 # install it using 
 #   jupyter kernelspec install </path/to/dir-containing-kernel-json>. 

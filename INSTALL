@@ -93,7 +93,7 @@ C. Notes
         $ pip3 install jfricas
         $ python3 -m jfricas.install_kernel
 
-  The 'request' library and the 'kernel.json' file will be installed 
+  The 'requests' library and the 'kernel.json' file will be installed 
   automatically by 'jfricas'.
 
 
@@ -103,10 +103,10 @@ C. Notes
   default is --user. Thus, the method which we are going to describe here is to
   install into $HOME/.local/... folders.
 
-  First, as above, we have to install jupyter and request:
+  First, as above, we have to install 'jupyter' and 'requests':
 
 	$ pip3 install jupyter
-        $ pip3 install request
+        $ pip3 install requests
 
   Second you will have to get the Git repository (assuming 'git' is installed):
  

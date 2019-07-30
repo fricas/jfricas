@@ -3,4 +3,3 @@ include jfricas/kspec/kernel.json
 include LICENSE
 include INSTALL
 include README.rst
-include READMEPyPI.rst

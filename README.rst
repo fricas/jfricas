@@ -112,7 +112,7 @@ References
 .. _SBCL: http://sbcl.org/
 .. _ASDF: https://common-lisp.net/project/asdf/
 .. _Firefox: https://www.mozilla.org/en-US/
-.. _INSTALL: INSTALL
+.. _INSTALL: https://github.com/fricas/jfricas/blob/master/INSTALL
 
 :Authors:
     Ralf Hemmecke,  
@@ -120,5 +120,5 @@ References
     
     (and sundry other good-natured folks)
 
-:Version: 0.2 of 2019/07/25
+:Version: 0.2.9 of 2019/07/30
 
