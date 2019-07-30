@@ -46,7 +46,7 @@ It is hardly worth to mention, a web-browser is required as well. We
 strongly recommend the latest `Firefox`_.
 
 
-Quick Install :rocket:
+Quick Install
 -------------
 Assuming the prerequisites are satisfied:
 ::
@@ -59,7 +59,7 @@ Assuming the prerequisites are satisfied:
 **Detailed** installation instructions may be found in `INSTALL`_.
 
 
-Install Development Version :construction:
+Install Development Version
 ---------------------------
 To install from this repository:
 ::
