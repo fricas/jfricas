@@ -382,3 +382,11 @@ Use ``<menu>/Quit`` instead (this will close the terminal window only).
 
 Command completion works as usual by pressing ``<TAB>``. 
 
+
+:Authors:
+    Ralf Hemmecke,  
+    Kurt Pagani
+    
+    (and sundry other good-natured folks)
+
+:Version: 0.2.9 of 2019/07/30
