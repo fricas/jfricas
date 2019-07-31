@@ -46,7 +46,19 @@ A. `Checking requirements`_
 B. `References`_ 
 C. `Notes`_
 
-.. _`Prerequisites`:
+.. _`Prerequisites`: `1 PREREQUISITES`_
+.. _`Installation using pip3`: `2 INSTALLATION USING PIP3`_
+.. _`Manual installation`: `3 MANUAL INSTALLATION`_
+.. _`Virtual environments`: `4 VIRTUAL ENVIRONMENTS`_
+.. _`Running the notebook`: `5 RUNNING THE NOTEBOOK`_
+.. _`Attaching a console`: `6 ATTACHING A CONSOLE`_
+.. _`Hyperdoc, Graphics, X11`: `7 HYPERDOC, GRAPHICS, X11`_
+.. _`Uninstall`: `8 UNINSTALL`_
+.. _`Checking requirements`: `A. Checking requirements`_
+.. _`References`: `B. References`_
+.. _`Notes`: `C. NOTES`_
+
+
 
 1 PREREQUISITES
 ---------------
@@ -87,7 +99,6 @@ It is hardly worth to mention, a web-browser is required as well. We
 strongly recommend the latest `Firefox`_.
 
 
-.. _`Installation using pip3`:
 
 2 INSTALLATION USING PIP3  
 -------------------------
@@ -104,8 +115,6 @@ Install Jupyter and jfricas by
 The ``requests`` library and the ``kernel.json`` file will be installed 
 automatically by *jfricas*.
 
-
-.. _`Manual installation`:
 
 3 MANUAL INSTALLATION
 ---------------------
@@ -151,14 +160,11 @@ the content of the ``install.sh`` file in the root directory of the Git
 repository (``./install.sh`` from within the Git repo).
 
 
-.. _`Virtual environments`:
 
 4 VIRTUAL ENVIRONMENTS
 ----------------------
   tbd
 
-
-.. _`Running the notebook`:
 
 5 RUNNING THE NOTEBOOK
 ----------------------
@@ -185,7 +191,6 @@ from the menu. After that (one or the other) the ``TAB`` can be closed.
 To quit completely (leaving jupyter), press the ``Quit`` button on the
 main Jupyter window. 
   
-.. _`Attaching a console`:
 
 6 ATTACHING A CONSOLE
 ---------------------
@@ -209,14 +214,12 @@ The ``QT`` console also requires:
     PyQt4 >= 4.7, PyQt5, PySide >= 1.0.3 or PySide2.
     
 
-.. _`Hyperdoc, Graphics, X11`:
 
 7 HYPERDOC, GRAPHICS, X11
 -------------------------
   tbd
   
 
-.. _`Uninstall`:
 
 8 UNINSTALL
 -----------
@@ -249,8 +252,6 @@ The commands may also be performed by hand:
 
 APPENDIX
 --------
-
-.. _`Checking requirements`:
 
 A. Checking requirements
 ------------------------
@@ -319,7 +320,6 @@ the versions of the required programs:
   VERSION_CODENAME=bionic
   UBUNTU_CODENAME=bionic
 
-.. _`References`:
 
 B. REFERENCES
 -------------
@@ -357,8 +357,6 @@ B. REFERENCES
 | `cl-hunchentoot`_      | 1.2.35     | 1.2.35   | Deb/Ub (apt)     |
 +------------------------+------------+----------+------------------+
 
-
-.. _`Notes`:
 
 C. NOTES 
 --------
