@@ -14,6 +14,7 @@ rather simple, compared to the former kernels based on CL/ZeroMQ or pexpect:
     | Common Lisp (CL) |                                        |Notebook |
     |------------------|                                        |QtConsole|
 
+
 `Hunchentoot`_ is a (well-known) webserver for `Common Lisp`_ while `webSPAD`_
 is a program (also in CL) providing the interface between FriCAS and
 Hunchentoot. In other words, FriCAS acts like a webserver responding to GET and
@@ -30,9 +31,9 @@ to install:
 The whole trick is to put these files to the right places.
 
 
-INSTALLATION INSTRUCTIONS
+**INSTALLATION INSTRUCTIONS**
 
-1. Prerequisites
+1. `Prerequisites`_
 2. Installation using pip3
 3. Manual installation
 4. Virtual environments
@@ -45,6 +46,7 @@ A. Checking requirements
 B. References 
 C. Notes
 
+.. _`Prerequisites`:
 
 1 PREREQUISITES
 ---------------
@@ -93,7 +95,7 @@ should work as follows (assuming the prerequisites are satisfied):
 Install Jupyter and jfricas by
 ::
 
-	$ pip3 install jupyter
+    $ pip3 install jupyter
     $ pip3 install jfricas
     $ python3 -m jfricas.install_kernel
 
@@ -110,7 +112,7 @@ is to install into ``$HOME/.local/...`` folders.
 First, we have to install ``jupyter`` and ``requests``:
 ::
 
-	$ pip3 install jupyter
+    $ pip3 install jupyter
     $ pip3 install requests
 
 Second, you will have to get the Git repository (assuming 'git' is installed):
@@ -191,6 +193,11 @@ kernel:
 
    (or 'console' for the ordinary one, instead of 'qtconsole').
   
+The ``QT`` console also requires:
+::
+
+    PyQt4 >= 4.7, PyQt5, PySide >= 1.0.3 or PySide2.
+    
 
 7 HYPERDOC, GRAPHICS, X11
 -------------------------
@@ -306,7 +313,14 @@ B. REFERENCES
 .. _Requests: http://python-requests.org/
 .. _cl-asdf: https://tracker.debian.org/pkg/cl-asdf
 .. _cl-hunchentoot: https://tracker.debian.org/pkg/hunchentoot
+.. _Hunchentoot: https://edicl.github.io/hunchentoot/
+.. _Common Lisp: https://en.wikipedia.org/wiki/Common_Lisp
+.. _SBCL: http://sbcl.org/
+.. _ASDF: https://common-lisp.net/project/asdf/
+.. _Firefox: https://www.mozilla.org/en-US/
+.. _INSTALL: https://github.com/fricas/jfricas/blob/master/INSTALL
 .. _webSPAD: https://github.com/nilqed/webSPAD
+
 
 +------------------------+------------+----------+------------------+
 | App / Versions, OS     | Min. ver.  | Tested   | OS/inst          |
@@ -345,8 +359,8 @@ Alternatively you may edit `kernel.json` of jfricas to use another name instead.
 
 `*`) ifricas was the name of the old LISP based kernel.
 
-Do not use ")quit" in consoles if you do not want to terminate the kernel. 
-Use <menu>/Quit instead (this will close the terminal window only).
+Do not use ``)quit`` in consoles if you do not want to terminate the kernel. 
+Use ``<menu>/Quit`` instead (this will close the terminal window only).
 
-Command completion works as usual by pressing <TAB>. 
+Command completion works as usual by pressing ``<TAB>``. 
 
