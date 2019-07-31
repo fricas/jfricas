@@ -42,9 +42,11 @@ The whole trick is to put these files to the right places.
 7. `Hyperdoc, Graphics, X11`_
 8. `Uninstall`_
 
-A. `Checking requirements`_
-B. `References`_ 
-C. `Notes`_
+Appendix
+
+A.  `Checking requirements`_
+B.  `References`_ 
+C.  `Notes`_
 
 .. _`Prerequisites`: `1 PREREQUISITES`_
 .. _`Installation using pip3`: `2 INSTALLATION USING PIP3`_
