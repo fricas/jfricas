@@ -34,17 +34,17 @@ The whole trick is to put these files to the right places.
 **INSTALLATION INSTRUCTIONS**
 
 1. `Prerequisites`_
-2. Installation using pip3
-3. Manual installation
-4. Virtual environments
-5. Running the notebook
-6. Attaching a console
-7. Hyperdoc, Graphics, X11
-8. Uninstall
+2. `Installation using pip3`_
+3. `Manual installation`_
+4. `Virtual environments`_
+5. `Running the notebook`_
+6. `Attaching a console`_
+7. `Hyperdoc, Graphics, X11`_
+8. `Uninstall`_
 
-A. Checking requirements
-B. References 
-C. Notes
+A. `Checking requirements`_
+B. `References`_ 
+C. `Notes`_
 
 .. _`Prerequisites`:
 
@@ -87,6 +87,8 @@ It is hardly worth to mention, a web-browser is required as well. We
 strongly recommend the latest `Firefox`_.
 
 
+.. _`Installation using pip3`:
+
 2 INSTALLATION USING PIP3  
 -------------------------
 Regardless of whether you will use a virtual environment **venv**, this method 
@@ -102,6 +104,8 @@ Install Jupyter and jfricas by
 The ``requests`` library and the ``kernel.json`` file will be installed 
 automatically by *jfricas*.
 
+
+.. _`Manual installation`:
 
 3 MANUAL INSTALLATION
 ---------------------
@@ -147,9 +151,14 @@ the content of the ``install.sh`` file in the root directory of the Git
 repository (``./install.sh`` from within the Git repo).
 
 
+.. _`Virtual environments`:
+
 4 VIRTUAL ENVIRONMENTS
 ----------------------
   tbd
+
+
+.. _`Running the notebook`:
 
 5 RUNNING THE NOTEBOOK
 ----------------------
@@ -176,7 +185,8 @@ from the menu. After that (one or the other) the ``TAB`` can be closed.
 To quit completely (leaving jupyter), press the ``Quit`` button on the
 main Jupyter window. 
   
-  
+.. _`Attaching a console`:
+
 6 ATTACHING A CONSOLE
 ---------------------
 During a notebook session, a console can be attached to the running kernel
@@ -199,11 +209,15 @@ The ``QT`` console also requires:
     PyQt4 >= 4.7, PyQt5, PySide >= 1.0.3 or PySide2.
     
 
+.. _`Hyperdoc, Graphics, X11`:
+
 7 HYPERDOC, GRAPHICS, X11
 -------------------------
   tbd
   
-  
+
+.. _`Uninstall`:
+
 8 UNINSTALL
 -----------
 Depending on which method you have installed the kernel it can be completely
@@ -235,6 +249,8 @@ The commands may also be performed by hand:
 
 APPENDIX
 --------
+
+.. _`Checking requirements`:
 
 A. Checking requirements
 ------------------------
@@ -303,6 +319,7 @@ the versions of the required programs:
   VERSION_CODENAME=bionic
   UBUNTU_CODENAME=bionic
 
+.. _`References`:
 
 B. REFERENCES
 -------------
@@ -341,6 +358,7 @@ B. REFERENCES
 +------------------------+------------+----------+------------------+
 
 
+.. _`Notes`:
 
 C. NOTES 
 --------
