@@ -1,5 +1,5 @@
 ===============================
-FriCAS JUPYTER KERNEL (jfricas)
+FriCAS Jupyter Kernel (jfricas)
 ===============================
 
 This Jupyter kernel for `FriCAS`_ is (hopefully) the final one of a series of
@@ -7,12 +7,12 @@ attempts to provide a stable and easy maintainable application. The concept is
 rather simple, compared to the former kernels based on CL/ZeroMQ or pexpect:
 ::
 
-    |------------------|
-    | webSPAD (WS)     |<--|kernel.json|-->|requests (Py)  |
-    | Hunchentoot (HT) |                   |fricaskernel.py|
-    | FriCAS (BOOT)    |                   |Jupyter/IPython|<-->|Browser  |
-    | Common Lisp (CL) |                                        |Notebook |
-    |------------------|                                        |QtConsole|
+    |------------------|                     |---------------|
+    | webSPAD (WS)     |<---|kernel.json|--->|requests (Py)  |
+    | Hunchentoot (HT) |                     |fricaskernel.py|
+    | FriCAS (BOOT)    |                     |Jupyter/IPython|<--->|Browser  |
+    | Common Lisp (CL) |                     |Python3        |     |Notebook |
+    |------------------|                     |---------------|     |QtConsole|
 
 
 `Hunchentoot`_ is a (well-known) webserver for `Common Lisp`_ while `webSPAD`_
@@ -24,9 +24,9 @@ in a nutshell, our new kernel essentially comprises three files which we have
 to install:
 
 
-  * kernel.json
-  * fricaskernel.py
-  * webspad.lisp   
+ :Kernel spec: kernel.json
+ :Wrapper Kernel: fricaskernel.py
+ :Web service: webspad.lisp   
 
 The whole trick is to put these files to the right places.
 
