@@ -44,26 +44,13 @@ The whole trick is to put these files to the right places.
 
 Appendix
 
-A.  `Checking requirements`_
-B.  `References`_ 
-C.  `Notes`_
-
-.. _`Prerequisites`: `1 PREREQUISITES`_
-.. _`Installation using pip3`: `2 INSTALLATION USING PIP3`_
-.. _`Manual installation`: `3 MANUAL INSTALLATION`_
-.. _`Virtual environments`: `4 VIRTUAL ENVIRONMENTS`_
-.. _`Running the notebook`: `5 RUNNING THE NOTEBOOK`_
-.. _`Attaching a console`: `6 ATTACHING A CONSOLE`_
-.. _`Hyperdoc, Graphics, X11`: `7 HYPERDOC, GRAPHICS, X11`_
-.. _`Uninstall`: `8 UNINSTALL`_
-.. _`Checking requirements`: `A. Checking requirements`_
-.. _`References`: `B. References`_
-.. _`Notes`: `C. NOTES`_
+*  `Checking requirements`_
+*  `References`_ 
+*  `Notes`_
 
 
-
-1 PREREQUISITES
----------------
+Prerequisites
+-------------
 The only supported OS at the moment is GNU/Linux - Debian/Ubuntu.
 
 For some other OS a docker image will be provided (soon).
@@ -102,8 +89,8 @@ strongly recommend the latest `Firefox`_.
 
 
 
-2 INSTALLATION USING PIP3  
--------------------------
+Installation using pip3  
+-----------------------
 Regardless of whether you will use a virtual environment **venv**, this method 
 should work as follows (assuming the prerequisites are satisfied):
 
@@ -118,8 +105,8 @@ The ``requests`` library and the ``kernel.json`` file will be installed
 automatically by *jfricas*.
 
 
-3 MANUAL INSTALLATION
----------------------
+Manual installation
+-------------------
 We recall that on Debian/Ubuntu pip3 will install packages locally, that is
 default is ``--user``. Thus, the method which we are going to describe here 
 is to install into ``$HOME/.local/...`` folders.
@@ -163,13 +150,13 @@ repository (``./install.sh`` from within the Git repo).
 
 
 
-4 VIRTUAL ENVIRONMENTS
-----------------------
+Virtual environments
+--------------------
   tbd
 
 
-5 RUNNING THE NOTEBOOK
-----------------------
+Running the notebook
+--------------------
 To start the notebook, type (anywhere):
 ::
 
@@ -194,8 +181,8 @@ To quit completely (leaving jupyter), press the ``Quit`` button on the
 main Jupyter window. 
   
 
-6 ATTACHING A CONSOLE
----------------------
+Attaching a console
+-------------------
 During a notebook session, a console can be attached to the running kernel
 by the command
 ::
@@ -217,14 +204,14 @@ The ``QT`` console also requires:
     
 
 
-7 HYPERDOC, GRAPHICS, X11
--------------------------
+Hyperdoc, Graphics, X11
+-----------------------
   tbd
   
 
 
-8 UNINSTALL
------------
+Uninstall
+---------
 Depending on which method you have installed the kernel it can be completely
 removed easily either by
 ::
@@ -255,8 +242,8 @@ The commands may also be performed by hand:
 APPENDIX
 --------
 
-A. Checking requirements
-------------------------
+Checking requirements
+---------------------
 The following sequence of commands show how to check the presence and (if)
 the versions of the required programs:
 ::
@@ -323,8 +310,8 @@ the versions of the required programs:
   UBUNTU_CODENAME=bionic
 
 
-B. REFERENCES
--------------
+References
+----------
 .. _FriCAS: https://github.com/fricas/fricas
 .. _Python3: https://www.python.org/
 .. _Pip3: https://pypi.org/project/pip/
@@ -360,8 +347,8 @@ B. REFERENCES
 +------------------------+------------+----------+------------------+
 
 
-C. NOTES 
---------
+Notes
+-----
 If jupyter is already in use and 
 ::
 
@@ -380,7 +367,7 @@ Alternatively you may edit `kernel.json` of jfricas to use another name instead.
 Do not use ``)quit`` in consoles if you do not want to terminate the kernel. 
 Use ``<menu>/Quit`` instead (this will close the terminal window only).
 
-Command completion works as usual by pressing ``<TAB>``. 
+Command completion works as usual by pressing ``TAB``. 
 
 
 :Authors:
