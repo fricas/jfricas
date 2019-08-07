@@ -12,23 +12,66 @@
 #                      pid.terminate() # terminate fricas+HT
 # 30-JUL-2019 ........ restart=False in do_shutdown
 #             ........ Language: spad (removed SPAD).
-#
+# 08-AUG-2019 ........ Added terminal feature: ['term','-?']+['fricas',...]
+#                      Added: user config section
+#                      Added: subprocess.run (! prefix for shell commands)
+#                      Removed: import imp --deprecated since 3.4
+#                      Tidy up.
+# 
 
 from ipykernel.kernelbase import Kernel
-from subprocess import Popen
+from subprocess import Popen, run, PIPE, STDOUT
 import requests
 import json
-import imp
 import os
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
+# ********************************
+# BEGIN user configuration options
+# ********************************
+pycmd = ')python'
+shcmd = '!'
+shutd = ')shutdown'
 
-def get_open_port():
+fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
+fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
+
+shell_timeout = 15 # Timeout for shell commands in secs.
+
+# LaTeX color/size parameters
+type_color = r"blue"
+type_size = r"\scriptsize"
+tex_color = r"black"
+tex_size = r"\normalsize"
+
+# Templates (TeX)
+pretex1 = r"\(\def\sp{^}\def\sb{_}\def\leqno(#1){}\)"
+pretex2 = r"\(\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}\)"
+pretex3 = r"\(\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}\)"
+pretex4 = r"\(\require{color}\)"
+pretex = pretex1+pretex2+pretex3+pretex4
+ljax = r"$$"  # variants: r"\("
+rjax = r"$$"  #           r"\)"
+
+# texout_types.format(tex_color,tex_size,tex,type_color,type_size,type)
+texout_types = r"""
+{{\color{{{0}}} {1} {2}}} \\[0.9ex] {{\color{{{3}}} {4} \text{{{5}}}}} \\
+"""
+
+# texout.format(tex_color,tex_size,tex)
+texout = r"""
+{{\color{{{0}}} {1} {2}}}
+"""
+# ***************
+# END user config
+# ***************
+
+def get_free_port():
         import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(("",0))
@@ -37,9 +80,12 @@ def get_open_port():
         s.close()
         return port
 
-htport=str(get_open_port())
+# Get new free port
+htport=str(get_free_port())
 
-pid=None # fricas+HT
+# PID of FriCAS+HT
+pid=None 
+
 
 class httpSPAD():
 
@@ -54,7 +100,6 @@ class httpSPAD():
         payload = {'code': code}
         r = requests.post(self.url, data=payload)
         data = r.text
-        #data = data.replace('\\','\\\\')
         data = data.replace('\r','\\r')
         data = data.replace('\n','\\n')
         self.output = json.loads(data.rstrip('\\n'))
@@ -80,38 +125,50 @@ class SPAD(Kernel):
     def do_execute(self, code, silent, store_history=True, 
                    user_expressions=None, allow_stdin=False):
 
-        if code.startswith(")python "):
-            self.output = str(eval(code.lstrip(")python ")))
+        # pre-process input
+        if code.startswith(pycmd):
+            # Python code in cell
+            self.output = str(eval(code[len(pycmd):].lstrip()))
             pyeval = {'name': 'stdout', 'text': self.output}
             self.send_response(self.iopub_socket, 'stream', pyeval)
             return
-        if code.startswith(")shutdown"):
+
+        if code.startswith(shutd):
+            # Shutdown requested
             self.do_shutdown(False)
             
+        if code.startswith(shcmd):
+            # Shell code in cell
+            cmd = str(code[len(shcmd):].lstrip())
+            cp = run(cmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
+            self.output = cp.stdout.decode()
+            sheval = {'name': 'stdout', 'text': self.output}
+            self.send_response(self.iopub_socket, 'stream', sheval)
+            return
 
         # send code to hunchentoot and get response
         r = self.server.put(code)
         data = dict()
         if r.ok:
+
             ff = self.server.output['format-flags']
+
             if ff['tex']=='true':
                 tex = self.server.output['tex']
                 typ = self.server.output['spad-type']
-                #data['text/latex'] = makeTeX(tex)
                 data['text/latex'] = makeTeXType(tex,typ)
+
             if ff['html']=='true':
                 data['text/html'] = self.server.output['html']
+
             if ff['mathml']=='true':
                 data['text/mathml'] = self.server.output['mathml']
-                
-            
+                        
             
         charybdis = self.server.output['charybdis']
         standard_output = self.server.output['stdout']
-        #tex = self.server.output['tex']
         spadtype = self.server.output['spad-type'] 
-        #data = {'text/latex':tex}
-        #data = {'text/plain':charybdis}
+
 
         if not silent:
             if ff['algebra'] == 'true':
@@ -172,7 +229,6 @@ class SPAD(Kernel):
         try:
             r = self.server.put(")quit")
             pid.terminate() # terminate fricas+HT
-        #self.app.stop()
         except:
             print("Go down anyway ...")
         return {'restart': False}
@@ -180,12 +236,12 @@ class SPAD(Kernel):
 
 
 
-# Here’s the Kernel spec kernel.json file for this:
+# Kernel spec kernel.json file for this:
 #
 # {"argv": ["python3", "-m","jfricas.fricaskernel","-f", "{connection_file}"],
 #   "display_name": "FriCAS", "language": "spad"}
 #    
-# install it using 
+# install it using e.g
 #   jupyter kernelspec install </path/to/dir-containing-kernel-json>. 
 # Place your kernel module anywhere Python can import it 
 # (try current directory for testing). 
@@ -219,32 +275,6 @@ class SPAD(Kernel):
 #         "texmcas":"false",
 #         "openmath":"false"}}
 
-# Default parameters
-type_color = r"blue"
-type_size = r"\scriptsize"
-tex_color = r"black"
-tex_size = r"\normalsize"
-
-
-# Templates (TeX)
-
-pretex1 = r"\(\def\sp{^}\def\sb{_}\def\leqno(#1){}\)"
-pretex2 = r"\(\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}\)"
-pretex3 = r"\(\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}\)"
-pretex4 = r"\(\require{color}\)"
-pretex = pretex1+pretex2+pretex3+pretex4
-ljax = r"$$"  # variants: r"\("
-rjax = r"$$"  #           r"\)"
-
-# texout_types.format(tex_color,tex_size,tex,type_color,type_size,type)
-texout_types = r"""
-{{\color{{{0}}} {1} {2}}} \\[0.9ex] {{\color{{{3}}} {4} \text{{{5}}}}} \\
-"""
-
-# texout.format(tex_color,tex_size,tex)
-texout = r"""
-{{\color{{{0}}} {1} {2}}}
-"""
 
 def makeTeX(rawtex):
     r = rawtex.strip().strip('$$')
@@ -1085,15 +1115,14 @@ spad_commands = command_list.split()
 if __name__ == '__main__':
     from ipykernel.kernelapp import IPKernelApp
     path=os.path.dirname(os.path.abspath(__file__))
-    #pid = Popen([path+"/fricasHT", "-p "+port]).pid
     req_asdf='(require :asdf)'
     req_ht='(require :hunchentoot)'
     ld_webspad='(load "{0}/webspad")'.format(path)
     start='(defvar webspad::fricas-acceptor (webspad::start {0} "localhost"))'.format(htport)
     ev1=')lisp (progn {0} {1} {2})'.format(req_asdf,req_ht,ld_webspad) 
     ev2=')lisp {0}'.format(start)
-    fopts=''
-    pid = Popen(["fricas","-eval",ev1,"-eval",ev2,fopts])
+    fopts = fricas_start_options
+    pid = Popen(fricas_terminal + ['fricas','-eval',ev1,'-eval',ev2,fopts])
     IPKernelApp.launch_instance(kernel_class=SPAD)
 
 
