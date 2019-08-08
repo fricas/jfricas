@@ -28,7 +28,7 @@ to install:
  :Wrapper Kernel: fricaskernel.py
  :Web service: webspad.lisp   
 
-The whole trick is to put these files to the right places.
+The whole trick is to put these files into the right places.
 
 
 **INSTALLATION INSTRUCTIONS**
@@ -94,7 +94,7 @@ Installation using pip3
 Regardless of whether you will use a virtual environment **venv**, this method 
 should work as follows (assuming the prerequisites are satisfied):
 
-Install Jupyter and jfricas by
+Install ``Jupyter`` and ``jfricas`` from ``PyPI`` by
 ::
 
     $ pip3 install jupyter
@@ -104,11 +104,30 @@ Install Jupyter and jfricas by
 The ``requests`` library and the ``kernel.json`` file will be installed 
 automatically by *jfricas*.
 
+Installation from GitHub
+^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+    $ pip3 install jupyter
+    $ git clone https://github.com/fricas/jfricas.git
+    $ cd jfricas
+    $ pip3 install .
+    $ python3 -m jfricas.install_kernel
+
+
+or, install directly from ``git`` repo branch 
+
+::
+
+    $ pip3 install jupyter
+    $ pip3 install git+https://github.com/fricas/jfricas.git@master
+    $ python3 -m jfricas.install_kernel
+    
 
 Manual installation
 -------------------
 We recall that on Debian/Ubuntu pip3 will install packages locally, that is
-default is ``--user``. Thus, the method which we are going to describe here 
+the default is ``--user``. Thus, the method which we are going to describe here 
 is to install into ``$HOME/.local/...`` folders.
 
 First, we have to install ``jupyter`` and ``requests``:
@@ -171,7 +190,7 @@ To leave the notebook you can enter (**save it** before!)
   
   	)quit
   	
-as usual, or choose 
+as usual, or choose (preferred) 
 ::
   
   	Close and Halt
