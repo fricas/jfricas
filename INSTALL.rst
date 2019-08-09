@@ -115,18 +115,18 @@ Installation from GitHub
     $ python3 -m jfricas.install_kernel
 
 
-or, install directly from ``git`` repo branch 
+or, install directly from the ``git`` repository branch: 
 
 ::
 
     $ pip3 install jupyter
-    $ pip3 install git+https://github.com/fricas/jfricas.git@master
+    $ pip3 install -e git+https://github.com/fricas/jfricas.git@master#egg=jfricas
     $ python3 -m jfricas.install_kernel
     
 
 Manual installation
 -------------------
-We recall that on Debian/Ubuntu pip3 will install packages locally, that is
+We recall that on Debian/Ubuntu ``pip3`` will install packages locally, that is
 the default is ``--user``. Thus, the method which we are going to describe here 
 is to install into ``$HOME/.local/...`` folders.
 
