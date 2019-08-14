@@ -17,7 +17,8 @@
 #                      Added: subprocess.run (! prefix for shell commands)
 #                      Removed: import imp --deprecated since 3.4
 #                      Tidy up.
-# 
+# 13-AUG-2019 ........ V 0.2.10
+#
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
@@ -29,7 +30,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.9'
+__version__ = '0.2.10'
 
 # ********************************
 # BEGIN user configuration options
@@ -42,6 +43,8 @@ fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
 
 shell_timeout = 15 # Timeout for shell commands in secs.
+
+html_prefix = '$HTML$'
 
 # LaTeX color/size parameters
 type_color = r"blue"
@@ -173,7 +176,12 @@ class SPAD(Kernel):
         if not silent:
             if ff['algebra'] == 'true':
                 if charybdis != "":
-                    stdout = {'name': 'stdout', 'text': charybdis}
+                    alg = self.server.output['algebra'].strip().strip('"')
+                    if alg.startswith(html_prefix):
+                        data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
+                        stdout = {'name': 'stdout', 'text': standard_output}
+                    else:
+                        stdout = {'name': 'stdout', 'text': charybdis}
                 else:
                     stdout = {'name': 'stdout', 'text': standard_output}
                 self.send_response(self.iopub_socket, 'stream', stdout)
@@ -187,6 +195,7 @@ class SPAD(Kernel):
                 stderr = {'name': 'stderr', 'text': standard_output}
                 self.send_response(self.iopub_socket, 'stream', stderr)
             
+
             # Display LaTeX, HTML, MathML ...
             display_data = {'data':data, 'metadata':{}}
             self.send_response(self.iopub_socket, 'display_data', display_data)
