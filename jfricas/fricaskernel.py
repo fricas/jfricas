@@ -18,19 +18,31 @@
 #                      Removed: import imp --deprecated since 3.4
 #                      Tidy up.
 # 13-AUG-2019 ........ V 0.2.10
+#                      +html_prefix in algebra output (type=String)
+# 14-AUG-2019 ........ V 0.2.11
+#                      +shell_result (store last sh result in python)
+#                      +shell_result_fricas (store sh result in Fricas)
+#                      +spadtype=String check for html_prefix in alg mode
+#                      :pip3 install .
+# 15-AUG-2019 ........ V 0.2.12
+#                      +gnuplot canvas
 #
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
 import requests
+import uuid
 import json
 import os
+
+from IPython.core.display import display, HTML
+from IPython.display import IFrame
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.10'
+__version__ = '0.2.12'
 
 # ********************************
 # BEGIN user configuration options
@@ -38,11 +50,14 @@ __version__ = '0.2.10'
 pycmd = ')python'
 shcmd = '!'
 shutd = ')shutdown'
+gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
 
 shell_timeout = 15 # Timeout for shell commands in secs.
+shell_result = None # store last sh result in python
+shell_result_fricas = '__system_result:="{0}"' # store sh result in Fricas
 
 html_prefix = '$HTML$'
 
@@ -70,6 +85,16 @@ texout_types = r"""
 texout = r"""
 {{\color{{{0}}} {1} {2}}}
 """
+
+# gnuplot canvas template (html5)
+gptpl =r"""
+<script src="canvastext.js"></script>
+<script src="gnuplot_common.js"></script>
+<canvas id="{0}" width=600 height=400></canvas>
+<script>{1}</script>
+<script>{2}();</script>
+"""
+
 # ***************
 # END user config
 # ***************
@@ -142,11 +167,28 @@ class SPAD(Kernel):
             
         if code.startswith(shcmd):
             # Shell code in cell
+            global shell_result
             cmd = str(code[len(shcmd):].lstrip())
             cp = run(cmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
             self.output = cp.stdout.decode()
             sheval = {'name': 'stdout', 'text': self.output}
             self.send_response(self.iopub_socket, 'stream', sheval)
+            shell_result = self.output
+            self.server.put(shell_result_fricas.format(self.output))
+            return
+
+        if code.startswith(gplot):
+            # gnuplot
+            gdata = dict()
+            cmdl = code[len(gplot):].lstrip().split('\n')
+            cmd = ';'.join(cmdl)
+            uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
+            gcmd = 'gnuplot -e "set term canvas name {0};{1}"'.format("'"+uid+"'",cmd)
+            gcp = run(gcmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
+            gjs = gcp.stdout.decode()
+            gdata['text/html'] = gptpl.format(uid,gjs,uid) 
+            display_data = {'data':gdata, 'metadata':{}}
+            self.send_response(self.iopub_socket, 'display_data', display_data)
             return
 
         # send code to hunchentoot and get response
@@ -176,12 +218,15 @@ class SPAD(Kernel):
         if not silent:
             if ff['algebra'] == 'true':
                 if charybdis != "":
-                    alg = self.server.output['algebra'].strip().strip('"')
-                    if alg.startswith(html_prefix):
-                        data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
-                        stdout = {'name': 'stdout', 'text': standard_output}
+                    if spadtype == "String":
+                        alg = self.server.output['algebra'].strip().strip('"')
+                        if alg.startswith(html_prefix):
+                           data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
+                           stdout = {'name': 'stdout', 'text': standard_output}
+                        else:
+                           stdout = {'name': 'stdout', 'text': charybdis}
                     else:
-                        stdout = {'name': 'stdout', 'text': charybdis}
+                        stdout = {'name': 'stdout', 'text': charybdis}   
                 else:
                     stdout = {'name': 'stdout', 'text': standard_output}
                 self.send_response(self.iopub_socket, 'stream', stdout)
