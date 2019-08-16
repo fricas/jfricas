@@ -6,7 +6,7 @@ def readme():
 
 kernel_sdir = 'jfricas/kspec'
 kernel_name = 'jfricas'
-kernel_version = '0.2.12'
+kernel_version = '0.2.13'
 prefix = None
 ldescr = readme()
 

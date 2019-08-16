@@ -26,6 +26,9 @@
 #                      :pip3 install .
 # 15-AUG-2019 ........ V 0.2.12
 #                      +gnuplot canvas
+# 16-AUG-2019 ........ V 0.2.13
+#                      +do_inspect (code inspection / SHIFT-TAB
+#                      key exception resolved (status/ret def msg)
 #
 
 from ipykernel.kernelbase import Kernel
@@ -42,7 +45,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.12'
+__version__ = '0.2.13'
 
 # ********************************
 # BEGIN user configuration options
@@ -94,6 +97,7 @@ gptpl =r"""
 <script>{1}</script>
 <script>{2}();</script>
 """
+
 
 # ***************
 # END user config
@@ -159,7 +163,8 @@ class SPAD(Kernel):
             self.output = str(eval(code[len(pycmd):].lstrip()))
             pyeval = {'name': 'stdout', 'text': self.output}
             self.send_response(self.iopub_socket, 'stream', pyeval)
-            return
+            return {'status': 'ok', 'execution_count': self.execution_count,
+                    'payload': [], 'user_expressions': {},}
 
         if code.startswith(shutd):
             # Shutdown requested
@@ -175,7 +180,8 @@ class SPAD(Kernel):
             self.send_response(self.iopub_socket, 'stream', sheval)
             shell_result = self.output
             self.server.put(shell_result_fricas.format(self.output))
-            return
+            return {'status': 'ok', 'execution_count': self.execution_count,
+                    'payload': [], 'user_expressions': {},}
 
         if code.startswith(gplot):
             # gnuplot
@@ -189,7 +195,8 @@ class SPAD(Kernel):
             gdata['text/html'] = gptpl.format(uid,gjs,uid) 
             display_data = {'data':gdata, 'metadata':{}}
             self.send_response(self.iopub_socket, 'display_data', display_data)
-            return
+            return {'status': 'ok', 'execution_count': self.execution_count,
+                    'payload': [], 'user_expressions': {},}
 
         # send code to hunchentoot and get response
         r = self.server.put(code)
@@ -288,6 +295,19 @@ class SPAD(Kernel):
         return {'restart': False}
         
 
+    def do_inspect(self, code, cursor_pos, detail_level=0):
+        data = dict()
+        code = code[:cursor_pos]
+        tokens = code.replace(';', ' ').split()
+        token = tokens[-1]
+        #start = cursor_pos - len(token)  
+        r = self.server.put(')display operation {0}'.format(token))
+        if r.ok:
+            data['text/plain'] = self.server.output['stdout']
+        else:
+            data['text/plain'] = 'No information about {0}'.format(token) 
+        return {'status' : 'ok', 'found' : True, 'data' : data, 
+                'metadata' : dict(),}                
 
 
 # Kernel spec kernel.json file for this:
