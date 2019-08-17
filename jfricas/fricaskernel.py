@@ -29,10 +29,15 @@
 # 16-AUG-2019 ........ V 0.2.13
 #                      +do_inspect (code inspection / SHIFT-TAB
 #                      key exception resolved (status/ret def msg)
+# 17-AUG-2019 ........ New: https://docs.python.org/3/library/pathlib.html
+#                      requires min Python 3.4 (needed to find gnuplot path)
+#
+#
 #
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
+from pathlib import Path
 import requests
 import uuid
 import json
@@ -45,7 +50,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.13'
+__version__ = '0.2.14'
 
 # ********************************
 # BEGIN user configuration options
@@ -89,10 +94,13 @@ texout = r"""
 {{\color{{{0}}} {1} {2}}}
 """
 
+# gnuplot standard path (see http://www.gnuplot.info/)
+gpp0 = Path("/usr/share/gnuplot/gnuplot/")
+gpjs = list(gpp0.glob('*/js/*.js'))
+gpss = "\n".join(['<script src="{0}"></script>'.format(str(s)) for s in gpjs])
+
 # gnuplot canvas template (html5)
-gptpl =r"""
-<script src="canvastext.js"></script>
-<script src="gnuplot_common.js"></script>
+gptpl = gpss + r"""
 <canvas id="{0}" width=600 height=400></canvas>
 <script>{1}</script>
 <script>{2}();</script>
@@ -186,6 +194,12 @@ class SPAD(Kernel):
         if code.startswith(gplot):
             # gnuplot
             gdata = dict()
+            if not gpp0.isdir():
+                gdata['text/html'] = "Gnuplot not found. Consult the docs."
+                display_data = {'data':gdata, 'metadata':{}}
+                self.send_response(self.iopub_socket, 'display_data', display_data)
+                return {'status': 'ok', 'execution_count': self.execution_count,
+                        'payload': [], 'user_expressions': {},}
             cmdl = code[len(gplot):].lstrip().split('\n')
             cmd = ';'.join(cmdl)
             uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
