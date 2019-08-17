@@ -227,8 +227,13 @@ Gnuplot
 -------
 :experimental:  todo 
 
+:ref:  gnuplot_ 
+
+.. image:: pics/gnuplot_test.png
+
 .. image:: pics/sys_gnuplot.png
 
+.. _gnuplot: http://www.gnuplot.info/
 
 Help
 ----
