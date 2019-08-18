@@ -222,6 +222,53 @@ eventually insert it into the notebook.
 
 :todo: ps2png 
 
+A simple (yet powerful) application to convert postscript images to ``PNG``
+is ``ps2png`` from the TtH_ and TtM_ packages
+::
+
+   !apt search ttm
+   
+   tth-common/bionic,now 4.12+ds-2 amd64 [installed]
+      auxiliary software material for TtH and TtM
+
+   ttm/bionic 4.12+ds-2 amd64
+      TeX/LaTeX to MathML converter
+      
+
+Install ``tth-common`` with ``apt`` then ``ps2png`` will be available.
+
+After conversion you can insert the ``PNG`` (or ``GIF`` as well) into the
+notebook by
+::
+
+   ESC-M  (i.e. change to markdown mode)
+   
+   ![text](pic.png)  (RETURN)
+   
+and the picture should appear.   
+
+:SYNOPSIS: ps2png
+
+::
+
+       tth [options] [<file.tex] [>file.html] [2>err]
+       tth [options] file.tex [2>err]
+       
+       ttm [options] [<file.tex] [>file.xml] [2>err]
+       ttm [options] file.tex [2>err]
+
+       latex2gif file (no extension)
+
+       ps2gif file.ps file.gif [icon.gif]
+
+       ps2png file.ps file.png [icon.gif]
+
+
+
+.. _TtM: http://manpages.ubuntu.com/manpages/precise/man1/ttm.1.html
+.. _TtH: http://manpages.ubuntu.com/manpages/precise/man1/tth.1.html
+
+
 
 Gnuplot (experimental)
 ----------------------

@@ -236,6 +236,7 @@ removed easily either by
 ::
   
 	$ pip3 uninstall jfricas 
+	$ jupyter kernelspec remove jfricas
 	
 or by using the bash script ``uninstall.sh``:
 ::
