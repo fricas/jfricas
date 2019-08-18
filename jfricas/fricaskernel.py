@@ -36,6 +36,7 @@
 #                      Serving js from https://nilqed.github.io/jfricas.pip/js/
 #                      (temporary solution -- gonna try /static/... later)
 #
+#
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
@@ -97,7 +98,8 @@ texout = r"""
 
 # gnuplot javascript files location
 # (todo: ought to be locally served, e.g. /static)
-gpjsf = 'https://nilqed.github.io/jfricas.pip/js'
+# gpjsf = 'https://nilqed.github.io/jfricas.pip/js'
+gpjsf = '/static/gpjs'
 
 # gnuplot canvas template (html5)
 gptpl =r"""

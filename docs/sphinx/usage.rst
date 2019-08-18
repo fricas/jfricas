@@ -223,17 +223,45 @@ eventually insert it into the notebook.
 :todo: ps2png 
 
 
-Gnuplot
--------
-:experimental:  todo 
+Gnuplot (experimental)
+----------------------
+Gnuplot_ (cited from the homepage) is a portable command-line driven graphing utility for Linux, OS/2, MS Windows, OSX, VMS, and many other platforms. It was originally created to allow scientists and students to visualize mathematical functions and data interactively, but has grown to support many non-interactive uses such as web scripting. It is also used as a plotting engine by third-party applications like Octave. Gnuplot has been supported and under active development since 1986.
+ 
+To use Gnuplot_ in ``jfricas``, it is required to have installed a version which supports
+the ``canvas`` terminal, e.g. version 5.2 or later   
+::
 
-:ref:  gnuplot_ 
+  sudo apt install gnuplot-nox
+
+  gnuplot-nox/bionic,now 5.2.2+dfsg1-2ubuntu1 amd64 [installed]
+  Command-line driven interactive plotting program. No-X package
+
+In order to find and serve the javascript files for the *HTML canvas* it is also
+required to create a symbolic link (as in the example below)
+::
+
+  # Open a python3 session to find the static file path
+  >>> import notebook.notebookapp
+  >>> notebook.notebookapp.DEFAULT_STATIC_FILES_PATH
+  '/home/kfp/.local/lib/python3.6/site-packages/notebook/static'
+
+  
+  # In a shell console create the symbolic link correspondingly
+  ln -s /usr/share/gnuplot/gnuplot/5.2/js/ 
+    /home/kfp/.local/lib/python3.6/site-packages/notebook/static/gpjs
+
+  # Start a notebook and check if it is ok by
+  http://localhost:8888/static/gpjs/canvastext.js
+
+
+:ref:  Gnuplot_ 
+
 
 .. image:: pics/gnuplot_test.png
 
 .. image:: pics/sys_gnuplot.png
 
-.. _gnuplot: http://www.gnuplot.info/
+.. _Gnuplot: http://www.gnuplot.info/
 
 Help
 ----
