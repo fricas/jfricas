@@ -32,12 +32,13 @@
 # 17-AUG-2019 ........ New: https://docs.python.org/3/library/pathlib.html
 #                      requires min Python 3.4 (needed to find gnuplot path)
 #                      -- wasn't a good idea -- rolled back
-#
+# 18-AUG-2019 ........ V 0.2.15 
+#                      Serving js from https://nilqed.github.io/jfricas.pip/js/
+#                      (temporary solution -- gonna try /static/... later)
 #
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
-#tbd: from pathlib import Path
 import requests
 import uuid
 import json
@@ -50,7 +51,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.14'
+__version__ = '0.2.15'
 
 # ********************************
 # BEGIN user configuration options
@@ -94,24 +95,17 @@ texout = r"""
 {{\color{{{0}}} {1} {2}}}
 """
 
-# gnuplot standard path (see http://www.gnuplot.info/)
-#gpp0 = Path("/usr/share/gnuplot/gnuplot/")
-#gpjs = list(gpp0.glob('*/js/*.js'))
-#gpss = "\n".join(['<script src="{0}"></script>'.format(str(s)) for s in gpjs])
+# gnuplot javascript files location
+# (todo: ought to be locally served, e.g. /static)
+gpjsf = 'https://nilqed.github.io/jfricas.pip/js'
 
 # gnuplot canvas template (html5)
-#gptplX = gpss + r"""
-#<canvas id="{0}" width=600 height=400></canvas>
-#<script>{1}</script>
-#<script>{2}();</script>
-#"""
-
 gptpl =r"""
-<script src="https://nilqed.github.io/jfricas.pip/canvastext.js"></script>
-<script src="https://nilqed.github.io/jfricas.pip/gnuplot_common.js"></script>
-<canvas id="{0}" width=600 height=400></canvas>
-<script>{1}</script>
-<script>{2}();</script>
+<script src="{0}/canvastext.js"></script>
+<script src="{0}/gnuplot_common.js"></script>
+<canvas id="{1}" width=600 height=400></canvas>
+<script>{2}</script>
+<script>{3}();</script>
 """
 
 # ***************
@@ -201,19 +195,13 @@ class SPAD(Kernel):
         if code.startswith(gplot):
             # gnuplot
             gdata = dict()
-            #if not gpp0.is_dir():
-            #    gdata['text/html'] = "Gnuplot not found. Consult the docs."
-            #    display_data = {'data':gdata, 'metadata':{}}
-            #    self.send_response(self.iopub_socket, 'display_data', display_data)
-            #    return {'status': 'ok', 'execution_count': self.execution_count,
-            #            'payload': [], 'user_expressions': {},}
             cmdl = code[len(gplot):].lstrip().split('\n')
             cmd = ';'.join(cmdl)
             uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
             gcmd = 'gnuplot -e "set term canvas name {0};{1}"'.format("'"+uid+"'",cmd)
             gcp = run(gcmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
             gjs = gcp.stdout.decode()
-            gdata['text/html'] = gptpl.format(uid,gjs,uid) 
+            gdata['text/html'] = gptpl.format(gpjsf, uid, gjs, uid) 
             display_data = {'data':gdata, 'metadata':{}}
             self.send_response(self.iopub_socket, 'display_data', display_data)
             return {'status': 'ok', 'execution_count': self.execution_count,
