@@ -31,13 +31,13 @@
 #                      key exception resolved (status/ret def msg)
 # 17-AUG-2019 ........ New: https://docs.python.org/3/library/pathlib.html
 #                      requires min Python 3.4 (needed to find gnuplot path)
-#
+#                      -- wasn't a good idea -- rolled back
 #
 #
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
-from pathlib import Path
+#tbd: from pathlib import Path
 import requests
 import uuid
 import json
@@ -95,17 +95,24 @@ texout = r"""
 """
 
 # gnuplot standard path (see http://www.gnuplot.info/)
-gpp0 = Path("/usr/share/gnuplot/gnuplot/")
-gpjs = list(gpp0.glob('*/js/*.js'))
-gpss = "\n".join(['<script src="{0}"></script>'.format(str(s)) for s in gpjs])
+#gpp0 = Path("/usr/share/gnuplot/gnuplot/")
+#gpjs = list(gpp0.glob('*/js/*.js'))
+#gpss = "\n".join(['<script src="{0}"></script>'.format(str(s)) for s in gpjs])
 
 # gnuplot canvas template (html5)
-gptpl = gpss + r"""
+#gptplX = gpss + r"""
+#<canvas id="{0}" width=600 height=400></canvas>
+#<script>{1}</script>
+#<script>{2}();</script>
+#"""
+
+gptpl =r"""
+<script src="https://nilqed.github.io/jfricas.pip/canvastext.js"></script>
+<script src="https://nilqed.github.io/jfricas.pip/gnuplot_common.js"></script>
 <canvas id="{0}" width=600 height=400></canvas>
 <script>{1}</script>
 <script>{2}();</script>
 """
-
 
 # ***************
 # END user config
@@ -194,12 +201,12 @@ class SPAD(Kernel):
         if code.startswith(gplot):
             # gnuplot
             gdata = dict()
-            if not gpp0.isdir():
-                gdata['text/html'] = "Gnuplot not found. Consult the docs."
-                display_data = {'data':gdata, 'metadata':{}}
-                self.send_response(self.iopub_socket, 'display_data', display_data)
-                return {'status': 'ok', 'execution_count': self.execution_count,
-                        'payload': [], 'user_expressions': {},}
+            #if not gpp0.is_dir():
+            #    gdata['text/html'] = "Gnuplot not found. Consult the docs."
+            #    display_data = {'data':gdata, 'metadata':{}}
+            #    self.send_response(self.iopub_socket, 'display_data', display_data)
+            #    return {'status': 'ok', 'execution_count': self.execution_count,
+            #            'payload': [], 'user_expressions': {},}
             cmdl = code[len(gplot):].lstrip().split('\n')
             cmd = ';'.join(cmdl)
             uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
