@@ -52,7 +52,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.15'
+__version__ = '0.2.16'
 
 # ********************************
 # BEGIN user configuration options

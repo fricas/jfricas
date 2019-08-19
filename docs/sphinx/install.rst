@@ -48,7 +48,7 @@ Appendix
 *  `References`_ 
 *  `Notes`_
 
-The full documentation is `jfricas_docs`_.
+
 
 Prerequisites
 -------------
@@ -182,7 +182,7 @@ packages in its site directories.
 The ``pip3`` install supports `venv`_:
 ::
 
-	Example:
+    Example:
 	
     sudo apt-get install python3-venv
     cd /tmp
@@ -246,17 +246,17 @@ The ``QT`` console also requires:
 
 **Note** that this is not the same as the usual start console in FriCAS,
 because all traffic will go through the kernel. If you want to have a 
-`real`console in parralel to Jupyter, you can configure this in the kernel
+*real* console in parallel to Jupyter, you can configure this in the kernel
 sources (attaching xterm or a gnome-terminal). 
-For details we refer to the section `kernel configuration` in the main 
+For details we refer to the section ``kernel configuration`` in the main 
 documentation `jfricas_docs`_.  
 
 Hyperdoc, Graphics, X11
 -----------------------
-The `X11` programs hyperdoc and graphics (`draw`) will work as usual, however,
-the hyperdoc pop-up window has been disabled by default (`-noht`). It is 
-possible to operate the web service without `X` at all. For details we refer
-to the section `kernel configuration` in the main documentation `jfricas_docs`_.
+The ``X11`` programs hyperdoc and graphics (``draw``) will work as usual, however,
+the hyperdoc pop-up window has been disabled by default (``-noht``). It is 
+possible to operate the web service without ``X`` at all. For details we refer
+to the section ``kernel configuration`` in the main documentation `jfricas_docs`_.
 
 Uninstall
 ---------
@@ -375,7 +375,7 @@ References
 .. _Firefox: https://www.mozilla.org/en-US/
 .. _INSTALL: https://github.com/fricas/jfricas/blob/master/INSTALL
 .. _webSPAD: https://github.com/nilqed/webSPAD
-.. _jfricas_docs: https://github.com/fricas/jfricas 
+.. _jfricas_docs: https://nilqed.github.io/jfricas.pip/sphinx/_build/html/index.html
 
 +------------------------+------------+----------+------------------+
 | App / Versions, OS     | Min. ver.  | Tested   | OS/inst          |
@@ -424,4 +424,4 @@ Use ``<menu>/Quit`` instead (this will close the terminal window only).
     
     (and sundry other good-natured folks)
 
-:Version: 0.2.15 of 2019/08/19
+:Version: 0.2.16 of 2019/08/19

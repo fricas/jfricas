@@ -308,6 +308,10 @@ required to create a symbolic link (as in the example below)
 
 .. image:: pics/sys_gnuplot.png
 
+.. image:: pics/gpdata1.png
+
+.. image:: pics/gpdata2.png
+
 .. _Gnuplot: http://www.gnuplot.info/
 
 Help
