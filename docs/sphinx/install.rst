@@ -1,5 +1,5 @@
 ============
-INSTALLATION
+Installation
 ============
 
 This Jupyter kernel for `FriCAS`_ is (hopefully) the final one of a series of

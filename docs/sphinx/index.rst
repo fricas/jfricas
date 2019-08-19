@@ -12,6 +12,7 @@ Welcome to jFriCAS's documentation!
 
    install.rst
    usage.rst
+   config.rst
 
 Indices and tables
 ==================

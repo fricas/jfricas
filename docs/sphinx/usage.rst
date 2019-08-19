@@ -326,17 +326,19 @@ Help
 
 Syntax Highlighting
 -------------------
-For those who like syntax highlighting there is a *codemirror mode* file, ``spad.js`` in 
-the folder ``docs/static``.
+For those who like syntax highlighting there is a *codemirror mode* 
+file, ``spad.js`` in  the folder ``docs/static``.
 This file should be served from
 ::
 
     localhost:8888/static/components/codemirror/mode/spad/spad.js
 
-In order to install it, we first have to find the ``static`` directory of the Jupyter notebook.
+In order to install it, we first have to find the ``static`` directory of the 
+Jupyter notebook.
 ::
 
-    STATIC=$(python3 -c "import notebook.notebookapp as nap; print(nap.DEFAULT_STATIC_FILES_PATH)")
+    STATIC=$(python3 -c "import notebook.notebookapp as nap; \
+	         print(nap.DEFAULT_STATIC_FILES_PATH)")
 
     echo $STATIC
     e.g. /.../.local/lib/python3.6/site-packages/notebook/static
@@ -351,5 +353,11 @@ In order to install it, we first have to find the ``static`` directory of the Ju
 Next time you start a notebook the mode will be loaded, and you should see coloured
 keywords and built-in's like ``if, then, else, for ,repeat ...``.
 
+..  image:: pics/codemirror.png 
 
+You may add more keywords by editing the file ``spad.js`` directly. 
+Thanks to `Bill Page`_ who provided ``axiom.js``, on which ``spad.js``
+is based.
+
+.. _Bill Page: https://github.com/billpage/CodeMirror/blob/master/mode/axiom/axiom.js
 
