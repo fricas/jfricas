@@ -425,4 +425,4 @@ Use ``<menu>/Quit`` instead (this will close the terminal window only).
     
     (and sundry other good-natured folks)
 
-:Version: 0.2.15 of 2019/08/19
+:Version: 0.2.16 of 2019/08/19
