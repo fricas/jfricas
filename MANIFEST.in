@@ -1,5 +1,4 @@
 include jfricas/webspad.lisp
 include jfricas/kspec/kernel.json
 include LICENSE
-include INSTALL
 include README.rst

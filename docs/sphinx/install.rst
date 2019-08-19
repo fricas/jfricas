@@ -1,5 +1,5 @@
 ============
-Installation
+INSTALLATION
 ============
 
 This Jupyter kernel for `FriCAS`_ is (hopefully) the final one of a series of
@@ -48,6 +48,7 @@ Appendix
 *  `References`_ 
 *  `Notes`_
 
+The full documentation is `jfricas_docs`_.
 
 Prerequisites
 -------------
@@ -171,8 +172,29 @@ repository (``./install.sh`` from within the Git repo).
 
 Virtual environments
 --------------------
-  tbd
+The `venv`_ module provides support for creating lightweight 
+`virtual environments` with their own site directories, optionally isolated 
+from system site directories. Each virtual environment has its own Python 
+binary (which matches the version of the binary that was used to create 
+this environment) and can have its own independent set of installed Python 
+packages in its site directories.
 
+The ``pip3`` install supports `venv`_:
+::
+
+	Example:
+	
+    sudo apt-get install python3-venv
+    cd /tmp
+    python3 -m venv jfenv
+    source jfenv/bin/activate
+
+    which pip3
+    /tmp/jfenv/bin/pip3
+
+    pip3 install ...
+
+.. _venv: https://docs.python.org/3/library/venv.html
 
 Running the notebook
 --------------------
@@ -222,12 +244,19 @@ The ``QT`` console also requires:
     PyQt4 >= 4.7, PyQt5, PySide >= 1.0.3 or PySide2.
     
 
+**Note** that this is not the same as the usual start console in FriCAS,
+because all traffic will go through the kernel. If you want to have a 
+`real`console in parralel to Jupyter, you can configure this in the kernel
+sources (attaching xterm or a gnome-terminal). 
+For details we refer to the section `kernel configuration` in the main 
+documentation `jfricas_docs`_.  
 
 Hyperdoc, Graphics, X11
 -----------------------
-  tbd
-  
-
+The `X11` programs hyperdoc and graphics (`draw`) will work as usual, however,
+the hyperdoc pop-up window has been disabled by default (`-noht`). It is 
+possible to operate the web service without `X` at all. For details we refer
+to the section `kernel configuration` in the main documentation `jfricas_docs`_.
 
 Uninstall
 ---------
@@ -235,8 +264,8 @@ Depending on which method you have installed the kernel it can be completely
 removed easily either by
 ::
   
-	$ pip3 uninstall jfricas
-	$ jupyter kernelspec remove jfricas 
+	$ pip3 uninstall jfricas 
+	$ jupyter kernelspec remove jfricas
 	
 or by using the bash script ``uninstall.sh``:
 ::
@@ -346,7 +375,7 @@ References
 .. _Firefox: https://www.mozilla.org/en-US/
 .. _INSTALL: https://github.com/fricas/jfricas/blob/master/INSTALL
 .. _webSPAD: https://github.com/nilqed/webSPAD
-
+.. _jfricas_docs: https://github.com/fricas/jfricas 
 
 +------------------------+------------+----------+------------------+
 | App / Versions, OS     | Min. ver.  | Tested   | OS/inst          |
@@ -387,7 +416,6 @@ Alternatively you may edit `kernel.json` of jfricas to use another name instead.
 Do not use ``)quit`` in consoles if you do not want to terminate the kernel. 
 Use ``<menu>/Quit`` instead (this will close the terminal window only).
 
-Command completion works as usual by pressing ``TAB``. 
 
 
 :Authors:
@@ -396,4 +424,4 @@ Command completion works as usual by pressing ``TAB``.
     
     (and sundry other good-natured folks)
 
-:Version: 0.2.9 of 2019/07/30
+:Version: 0.2.15 of 2019/08/19
