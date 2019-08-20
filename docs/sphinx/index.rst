@@ -13,6 +13,7 @@ Welcome to jFriCAS's documentation!
    install.rst
    usage.rst
    config.rst
+   webspad.rst
 
 Indices and tables
 ==================
