@@ -14,6 +14,8 @@ Welcome to jFriCAS's documentation!
    usage.rst
    config.rst
    webspad.rst
+   remote.rst
+   docker.rst
 
 Indices and tables
 ==================
