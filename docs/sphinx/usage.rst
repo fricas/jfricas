@@ -292,6 +292,9 @@ required to create a symbolic link (as in the example below)
   >>> notebook.notebookapp.DEFAULT_STATIC_FILES_PATH
   '/home/kfp/.local/lib/python3.6/site-packages/notebook/static'
 
+  or in a notebook session (preferred)
+
+  )python static_file_path
   
   # In a shell console create the symbolic link correspondingly
   ln -s /usr/share/gnuplot/gnuplot/5.2/js/ 

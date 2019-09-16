@@ -34,6 +34,10 @@
 #                      -- wasn't a good idea -- rolled back
 # 18-AUG-2019 ........ V 0.2.15 
 #                      Serving js from https://nilqed.github.io/jfricas.pip/js/
+# 19-AUG-2019 ........ V 0.2.16
+#                      serving from /static
+# 14-SEP-2019 ........ V 0.2.17
+#                      define python variables: static_file_path, kernel_file_path
 #                      (temporary solution -- gonna try /static/... later)
 #
 #
@@ -52,7 +56,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.16'
+__version__ = '0.2.17'
 
 # ********************************
 # BEGIN user configuration options
@@ -97,11 +101,10 @@ texout = r"""
 """
 
 # gnuplot javascript files location
-# (todo: ought to be locally served, e.g. /static)
-# gpjsf = 'https://nilqed.github.io/jfricas.pip/js'
 gpjsf = '/static/gpjs'
 
 # gnuplot canvas template (html5)
+# 0:static_path, 1:uuid, 2:code, 3:function_call
 gptpl =r"""
 <script src="{0}/canvastext.js"></script>
 <script src="{0}/gnuplot_common.js"></script>
@@ -114,6 +117,16 @@ gptpl =r"""
 # END user config
 # ***************
 
+try:
+    import notebook.notebookapp
+    static_file_path = notebook.notebookapp.DEFAULT_STATIC_FILES_PATH
+except:
+    static_file_path = None
+
+kernel_file_path = os.path.abspath(__file__)
+
+
+# Function to find a free port
 def get_free_port():
         import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

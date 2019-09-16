@@ -49,7 +49,7 @@ Appendix
 *  `Notes`_
 
 
-The full **documentation** is `jfricas_docs`_.
+The full **documentation** is in `jfricas_docs`_.
 
 Prerequisites
 -------------
@@ -425,4 +425,4 @@ Use ``<menu>/Quit`` instead (this will close the terminal window only).
     
     (and sundry other good-natured folks)
 
-:Version: 0.2.16 of 2019/08/19
+:Version: 0.2.17 of 2019/09/17

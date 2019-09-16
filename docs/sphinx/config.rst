@@ -14,6 +14,11 @@ installed:
    In the running kernel (notebook or console):
    
    )python os.path.abspath(__file__)
+
+   or, similarly
+
+   )python kernel_file_path
+
    
 Example:
    
