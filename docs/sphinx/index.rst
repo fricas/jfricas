@@ -16,6 +16,8 @@ Welcome to jFriCAS's documentation!
    webspad.rst
    remote.rst
    docker.rst
+   gnuplot.rst
+
 
 Indices and tables
 ==================
