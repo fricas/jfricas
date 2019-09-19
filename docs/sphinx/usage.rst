@@ -142,7 +142,7 @@ For example, getting the IP port of the current Fricas+HT instance:
 
 .. image:: pics/htport.png
 
-or, if wou want to know, where the current kernel has been installed:
+or, if wou want to know where the current kernel has been installed:
 
 .. image:: pics/fricaskernel_loc.png
 
@@ -151,7 +151,7 @@ kernel file and add ``globals`` to ``eval``.
 
 Editing files
 -------------
-There are may ways to create and edit files during a Jupyter notebook session.
+There are many ways to create and edit files during a Jupyter notebook session.
 (certainly from the Jupyter main page). You can use the Fricas system 
 command ``)edit``, provided the shell variable ``EDITOR`` has been set, or
 you may use any editor by prefixing ``!``, e.g. ``gedit``.
