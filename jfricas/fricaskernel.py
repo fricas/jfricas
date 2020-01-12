@@ -32,7 +32,7 @@
 # 17-AUG-2019 ........ New: https://docs.python.org/3/library/pathlib.html
 #                      requires min Python 3.4 (needed to find gnuplot path)
 #                      -- wasn't a good idea -- rolled back
-# 18-AUG-2019 ........ V 0.2.15 
+# 18-AUG-2019 ........ V 0.2.15
 #                      Serving js from https://nilqed.github.io/jfricas.pip/js/
 # 19-AUG-2019 ........ V 0.2.16
 #                      serving from /static
@@ -140,7 +140,7 @@ def get_free_port():
 htport=str(get_free_port())
 
 # PID of FriCAS+HT
-pid=None 
+pid=None
 
 
 class httpSPAD():
@@ -149,8 +149,8 @@ class httpSPAD():
         # Store parameters
         self.url = url
         self.output = None
-        
-        
+
+
     def put(self, code):
         # POST request
         payload = {'code': code}
@@ -160,7 +160,7 @@ class httpSPAD():
         data = data.replace('\n','\\n')
         self.output = json.loads(data.rstrip('\\n'))
         return(r)
-        
+
 
 class SPAD(Kernel):
     implementation = 'spad'
@@ -170,15 +170,15 @@ class SPAD(Kernel):
     language_info = {'name': 'spad', 'mimetype': 'text/plain',
                      'file_extension': '.input',}
     banner = "FriCAS Jupyter Kernel"
-    
-    
+
+
     def __init__(self, **kwargs):
         Kernel.__init__(self, **kwargs)
         self.server = httpSPAD()
         self.spadcmds = spad_commands
 
 
-    def do_execute(self, code, silent, store_history=True, 
+    def do_execute(self, code, silent, store_history=True,
                    user_expressions=None, allow_stdin=False):
 
         # pre-process input
@@ -193,7 +193,7 @@ class SPAD(Kernel):
         if code.startswith(shutd):
             # Shutdown requested
             self.do_shutdown(False)
-            
+
         if code.startswith(shcmd):
             # Shell code in cell
             global shell_result
@@ -216,7 +216,7 @@ class SPAD(Kernel):
             gcmd = 'gnuplot -e "set term canvas name {0};{1}"'.format("'"+uid+"'",cmd)
             gcp = run(gcmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
             gjs = gcp.stdout.decode()
-            gdata['text/html'] = gptpl.format(gpjsf, uid, gjs, uid) 
+            gdata['text/html'] = gptpl.format(gpjsf, uid, gjs, uid)
             display_data = {'data':gdata, 'metadata':{}}
             self.send_response(self.iopub_socket, 'display_data', display_data)
             return {'status': 'ok', 'execution_count': self.execution_count,
@@ -239,11 +239,11 @@ class SPAD(Kernel):
 
             if ff['mathml']=='true':
                 data['text/mathml'] = self.server.output['mathml']
-                        
-            
+
+
         charybdis = self.server.output['charybdis']
         standard_output = self.server.output['stdout']
-        spadtype = self.server.output['spad-type'] 
+        spadtype = self.server.output['spad-type']
 
 
         if not silent:
@@ -257,7 +257,7 @@ class SPAD(Kernel):
                         else:
                            stdout = {'name': 'stdout', 'text': charybdis}
                     else:
-                        stdout = {'name': 'stdout', 'text': charybdis}   
+                        stdout = {'name': 'stdout', 'text': charybdis}
                 else:
                     stdout = {'name': 'stdout', 'text': standard_output}
                 self.send_response(self.iopub_socket, 'stream', stdout)
@@ -265,12 +265,12 @@ class SPAD(Kernel):
                 if standard_output != "":
                     stdout = {'name': 'stdout', 'text': standard_output}
                     self.send_response(self.iopub_socket, 'stream', stdout)
-                
-            # Error handling (red)    
+
+            # Error handling (red)
             if charybdis.startswith("error"):
                 stderr = {'name': 'stderr', 'text': standard_output}
                 self.send_response(self.iopub_socket, 'stream', stderr)
-            
+
 
             # Display LaTeX, HTML, MathML ...
             display_data = {'data':data, 'metadata':{}}
@@ -298,13 +298,13 @@ class SPAD(Kernel):
             return default
 
         token = tokens[-1]
-        start = cursor_pos - len(token)  
-        
+        start = cursor_pos - len(token)
+
         matches = [m for m in self.spadcmds if m.startswith(token)]
 
         return {'matches': matches, 'cursor_start': start,
                 'cursor_end': cursor_pos, 'metadata': dict(),'status': 'ok'}
-                
+
 
     def do_shutdown(self, restart):
         "Changes in 5.0: <data> replaced by <text>"
@@ -317,38 +317,38 @@ class SPAD(Kernel):
         except:
             print("Go down anyway ...")
         return {'restart': False}
-        
+
 
     def do_inspect(self, code, cursor_pos, detail_level=0):
         data = dict()
         code = code[:cursor_pos]
         tokens = code.replace(';', ' ').split()
         token = tokens[-1]
-        #start = cursor_pos - len(token)  
+        #start = cursor_pos - len(token)
         r = self.server.put(')display operation {0}'.format(token))
         if r.ok:
             data['text/plain'] = self.server.output['stdout']
         else:
-            data['text/plain'] = 'No information about {0}'.format(token) 
-        return {'status' : 'ok', 'found' : True, 'data' : data, 
-                'metadata' : dict(),}                
+            data['text/plain'] = 'No information about {0}'.format(token)
+        return {'status' : 'ok', 'found' : True, 'data' : data,
+                'metadata' : dict(),}
 
 
 # Kernel spec kernel.json file for this:
 #
 # {"argv": ["python3", "-m","jfricas.fricaskernel","-f", "{connection_file}"],
 #   "display_name": "FriCAS", "language": "spad"}
-#    
+#
 # install it using e.g
-#   jupyter kernelspec install </path/to/dir-containing-kernel-json>. 
-# Place your kernel module anywhere Python can import it 
-# (try current directory for testing). 
-# Finally, you can run your kernel using 
-#  jupyter console --kernel=jfricas. 
-# 
+#   jupyter kernelspec install </path/to/dir-containing-kernel-json>.
+# Place your kernel module anywhere Python can import it
+# (try current directory for testing).
+# Finally, you can run your kernel using
+#  jupyter console --kernel=jfricas.
+#
 
 # ===================
-# SPAD -> JSON Output 
+# SPAD -> JSON Output
 # ===================
 #
 #  { "input":"D(x^n,x,4)",
@@ -363,7 +363,7 @@ class SPAD(Kernel):
 #    "fortran":"",
 #    "texmacs":"",
 #    "openmath":"",
-#    "format-flags": 
+#    "format-flags":
 #        {"algebra":"true",
 #         "tex":"false",
 #         "html":"false",
@@ -384,8 +384,8 @@ def makeTeXType(rawtex,rawtype):
     r = rawtex.strip().strip('$$')
     r = texout_types.format(tex_color,tex_size,r,type_color,type_size,rawtype)
     r = pretex + ljax + r + rjax
-    return r    
-    
+    return r
+
 
 ### cat spadcmd.txt | par 85j > spadcmd85.txt
 
@@ -1217,10 +1217,8 @@ if __name__ == '__main__':
     req_ht='(require :hunchentoot)'
     ld_webspad='(load "{0}/webspad")'.format(path)
     start='(defvar webspad::fricas-acceptor (webspad::start {0} "localhost"))'.format(htport)
-    ev1=')lisp (progn {0} {1} {2})'.format(req_asdf,req_ht,ld_webspad) 
+    ev1=')lisp (progn {0} {1} {2})'.format(req_asdf,req_ht,ld_webspad)
     ev2=')lisp {0}'.format(start)
     fopts = fricas_start_options
     pid = Popen(fricas_terminal + ['fricas','-eval',ev1,'-eval',ev2,fopts])
     IPKernelApp.launch_instance(kernel_class=SPAD)
-
-

@@ -4,7 +4,7 @@
 jupyter kernelspec remove jfricas
 jupyter kernelspec list
 
-# Search for Python user site 
+# Search for Python user site
 PYUSRSITE=$(python3 -m site --user-site)
 
 # Remove kernel and webspad

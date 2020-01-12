@@ -19,14 +19,14 @@ rather simple, compared to the former kernels based on CL/ZeroMQ or pexpect:
 is a program (also in CL) providing the interface between FriCAS and
 Hunchentoot. In other words, FriCAS acts like a webserver responding to GET and
 POST requests. On the Python side these GET and POST requests are handled by the
-``requests`` library inside the wrapper kernel ``fricaskernel.py``. To put it 
-in a nutshell, our new kernel essentially comprises three files which we have 
+``requests`` library inside the wrapper kernel ``fricaskernel.py``. To put it
+in a nutshell, our new kernel essentially comprises three files which we have
 to install:
 
 
  :Kernel spec: kernel.json
  :Wrapper Kernel: fricaskernel.py
- :Web service: webspad.lisp   
+ :Web service: webspad.lisp
 
 The whole trick is to put these files into the right places.
 
@@ -45,7 +45,7 @@ The whole trick is to put these files into the right places.
 Appendix
 
 *  `Checking requirements`_
-*  `References`_ 
+*  `References`_
 *  `Notes`_
 
 
@@ -56,7 +56,7 @@ The only supported OS at the moment is GNU/Linux - Debian/Ubuntu.
 
 For some other OS a docker image will be provided (soon).
 
-We require a version of `FriCAS`_ which was compiled with a `Common Lisp`_ that 
+We require a version of `FriCAS`_ which was compiled with a `Common Lisp`_ that
 supports multithreading and `Hunchentoot`_. We recommend `SBCL`_ 1.4.5 or later.
 
 Since Python 2.7 will not be maintained past 2020, we will concentrate on
@@ -90,9 +90,9 @@ strongly recommend the latest `Firefox`_.
 
 
 
-Installation using pip3  
+Installation using pip3
 -----------------------
-Regardless of whether you will use a virtual environment **venv**, this method 
+Regardless of whether you will use a virtual environment **venv**, this method
 should work as follows (assuming the prerequisites are satisfied):
 
 Install ``Jupyter`` and ``jfricas`` from ``PyPI`` by
@@ -102,7 +102,7 @@ Install ``Jupyter`` and ``jfricas`` from ``PyPI`` by
     $ pip3 install jfricas
     $ python3 -m jfricas.install_kernel
 
-The ``requests`` library and the ``kernel.json`` file will be installed 
+The ``requests`` library and the ``kernel.json`` file will be installed
 automatically by *jfricas*.
 
 Installation from GitHub
@@ -116,19 +116,19 @@ Installation from GitHub
     $ python3 -m jfricas.install_kernel
 
 
-or, install directly from the ``git`` repository branch: 
+or, install directly from the ``git`` repository branch:
 
 ::
 
     $ pip3 install jupyter
     $ pip3 install -e git+https://github.com/fricas/jfricas.git@master#egg=jfricas
     $ python3 -m jfricas.install_kernel
-    
+
 
 Manual installation
 -------------------
 We recall that on Debian/Ubuntu ``pip3`` will install packages locally, that is
-the default is ``--user``. Thus, the method which we are going to describe here 
+the default is ``--user``. Thus, the method which we are going to describe here
 is to install into ``$HOME/.local/...`` folders.
 
 First, we have to install ``jupyter`` and ``requests``:
@@ -139,8 +139,8 @@ First, we have to install ``jupyter`` and ``requests``:
 
 Second, you will have to get the Git repository (assuming 'git' is installed):
 ::
- 
-	$ git clone https://github.com/fricas/jfricas.git 
+
+	$ git clone https://github.com/fricas/jfricas.git
 
 Then ``cd`` to it:
 ::
@@ -151,17 +151,17 @@ and perform the following bash commands:
 ::
 
 	$ jupyter kernelspec install ./jfricas/kspec --name='jfricas' --user
-	$ jupyter kernelspec list 
+	$ jupyter kernelspec list
 	### you should see 'jfricas' now.
 
-	# Search for the Python3 user site 
+	# Search for the Python3 user site
 	$ PYUSRSITE=$(python3 -m site --user-site)
 
 	# Copy kernel and webspad
 	$ mkdir -p -v $PYUSRSITE/jfricas
 	$ cp -v ./jfricas/fricaskernel.py $PYUSRSITE/jfricas
 	$ cp -v ./jfricas/webspad.lisp    $PYUSRSITE/jfricas
-  
+
 That is all.
 
 The above commands (except the jupyter installation) are more or less
@@ -172,18 +172,18 @@ repository (``./install.sh`` from within the Git repo).
 
 Virtual environments
 --------------------
-The `venv`_ module provides support for creating lightweight 
-`virtual environments` with their own site directories, optionally isolated 
-from system site directories. Each virtual environment has its own Python 
-binary (which matches the version of the binary that was used to create 
-this environment) and can have its own independent set of installed Python 
+The `venv`_ module provides support for creating lightweight
+`virtual environments` with their own site directories, optionally isolated
+from system site directories. Each virtual environment has its own Python
+binary (which matches the version of the binary that was used to create
+this environment) and can have its own independent set of installed Python
 packages in its site directories.
 
 The ``pip3`` install supports `venv`_:
 ::
 
     Example:
-	
+
     sudo apt-get install python3-venv
     cd /tmp
     python3 -m venv jfenv
@@ -205,56 +205,56 @@ To start the notebook, type (anywhere):
 
 A browser window should open where you can choose ``NEW->FriCAS``, then
 after a while (first time some Lisp programs will be compiled, do not
-worry) you may enter for instance: ``)version``, followed by ``Shift-RETURN``. 
-  
+worry) you may enter for instance: ``)version``, followed by ``Shift-RETURN``.
+
 To leave the notebook you can enter (**save it** before!)
 ::
-  
+
   	)quit
-  	
-as usual, or choose (preferred) 
+
+as usual, or choose (preferred)
 ::
-  
+
   	Close and Halt
-  	
+
 from the menu. After that (one or the other) the ``TAB`` can be closed.
 To quit completely (leaving jupyter), press the ``Quit`` button on the
-main Jupyter window. 
-  
+main Jupyter window.
+
 
 Attaching a console
 -------------------
 During a notebook session, a console can be attached to the running kernel
 by the command
 ::
-  
+
     $ jupyter qtconsole --existing
-    
-Of course, instead of a notebook at all, one may use consoles with the 
+
+Of course, instead of a notebook at all, one may use consoles with the
 kernel:
 ::
-  
+
     $ jupyter qtconsole --kernel=jfricas
 
    (or 'console' for the ordinary one, instead of 'qtconsole').
-  
+
 The ``QT`` console also requires:
 ::
 
     PyQt4 >= 4.7, PyQt5, PySide >= 1.0.3 or PySide2.
-    
+
 
 **Note** that this is not the same as the usual start console in FriCAS,
-because all traffic will go through the kernel. If you want to have a 
+because all traffic will go through the kernel. If you want to have a
 *real* console in parallel to Jupyter, you can configure this in the kernel
-sources (attaching xterm or a gnome-terminal). 
-For details we refer to the section ``kernel configuration`` in the main 
-documentation `jfricas_docs`_.  
+sources (attaching xterm or a gnome-terminal).
+For details we refer to the section ``kernel configuration`` in the main
+documentation `jfricas_docs`_.
 
 Hyperdoc, Graphics, X11
 -----------------------
 The ``X11`` programs hyperdoc and graphics (``draw``) will work as usual, however,
-the hyperdoc pop-up window has been disabled by default (``-noht``). It is 
+the hyperdoc pop-up window has been disabled by default (``-noht``). It is
 possible to operate the web service without ``X`` at all. For details we refer
 to the section ``kernel configuration`` in the main documentation `jfricas_docs`_.
 
@@ -263,30 +263,30 @@ Uninstall
 Depending on which method you have installed the kernel it can be completely
 removed easily either by
 ::
-  
-	$ pip3 uninstall jfricas 
+
+	$ pip3 uninstall jfricas
 	$ jupyter kernelspec remove jfricas
-	
+
 or by using the bash script ``uninstall.sh``:
 ::
-  
+
     $ ./uninstall.sh
-    
+
 The commands may also be performed by hand:
 ::
-  
+
     # Remove kernel
     jupyter kernelspec remove jfricas
     jupyter kernelspec list
 
-    # Search for Python user site 
+    # Search for Python user site
     PYUSRSITE=$(python3 -m site --user-site)
 
     # Remove kernel and webspad
     rm -v $PYUSRSITE/jfricas/fricaskernel.py
     rm -v $PYUSRSITE/jfricas/webspad.lisp
-    rmdir -v --ignore-fail-on-non-empty $PYUSRSITE/jfricas 
-  
+    rmdir -v --ignore-fail-on-non-empty $PYUSRSITE/jfricas
+
 
 APPENDIX
 --------
@@ -398,12 +398,12 @@ References
 
 Notes
 -----
-If jupyter is already in use and 
+If jupyter is already in use and
 ::
 
 	$ jupyter kernelspec list
 
-shows `ifricas` as available kernel, then you have to remove it by 
+shows `ifricas` as available kernel, then you have to remove it by
 ::
 
 	$ jupyter kernelspec remove ifricas
@@ -413,15 +413,15 @@ Alternatively you may edit `kernel.json` of jfricas to use another name instead.
 
 `*`) ifricas was the name of the old LISP based kernel.
 
-Do not use ``)quit`` in consoles if you do not want to terminate the kernel. 
+Do not use ``)quit`` in consoles if you do not want to terminate the kernel.
 Use ``<menu>/Quit`` instead (this will close the terminal window only).
 
 
 
 :Authors:
-    Ralf Hemmecke,  
+    Ralf Hemmecke,
     Kurt Pagani
-    
+
     (and sundry other good-natured folks)
 
 :Version: 0.2.16 of 2019/08/19

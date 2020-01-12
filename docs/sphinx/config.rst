@@ -12,17 +12,17 @@ installed:
 ::
 
    In the running kernel (notebook or console):
-   
+
    )python os.path.abspath(__file__)
 
    or, similarly
 
    )python kernel_file_path
 
-   
+
 Example:
-   
-.. image:: pics/kernel_loc.png    
+
+.. image:: pics/kernel_loc.png
 
 
 Edit the Kernel File
@@ -34,7 +34,7 @@ the ``BEGIN  user configuration options``.
     # ********************************
     # BEGIN user configuration options
     # ********************************
-    
+
 Foreign commands
 ----------------
 The following commands are not part of FriCAS, however, we use the same
@@ -83,27 +83,27 @@ The FriCAS start options excactly correspond the ones from
 However, let us emphasize that not many of them will actually work as
 expected when set in ``fricas_start_options``. The options ``-nosman``
 and ``-nox``, for example, might block in case some commands are used which
-require the ``X11`` system. We have not tested much of the possible 
-combinations, but en/dis-abling *Clef* and *Hyperdoc* for example, is certainly 
-no problem. 
+require the ``X11`` system. We have not tested much of the possible
+combinations, but en/dis-abling *Clef* and *Hyperdoc* for example, is certainly
+no problem.
 
 Shell commands
 ^^^^^^^^^^^^^^
 These variables control the external shell commands:
 ::
- 
+
     shell_timeout = 15 # Timeout for shell commands in secs.
     shell_result = None # store last sh result in python
     shell_result_fricas = '__system_result:="{0}"' # store sh result in Fricas
 
 The ``shell_timeout`` may be adjusted to suite you needs (in case your shell
-jobs might run more than 15 seconds). 
+jobs might run more than 15 seconds).
 
 The ``shell_result`` **must** not be changed (just initializing).
 
-The ``shell_result_fricas`` variable holds the name of the FriCAS variable 
+The ``shell_result_fricas`` variable holds the name of the FriCAS variable
 which stores the last shell output as string. If you wanted another name
-than ``__system_result``, then you would change it here (note that the 
+than ``__system_result``, then you would change it here (note that the
 part ``:="{0}"`` is mandatory).
 
 HTML prefix
@@ -112,10 +112,10 @@ The HTML prefix defines which strings (Type: String) returned from FricAS
 will be interpreted as HTML code.
 
 ::
-	
+
 	html_prefix = '$HTML$'
 
-You are free to change this, provided that Python can recognize it 
+You are free to change this, provided that Python can recognize it
 (technically: str.startswith).
 
 LaTeX/MathJax related
@@ -123,13 +123,13 @@ LaTeX/MathJax related
 The MathJax output (``set output tex on``) is controlled by the following
 options:
 ::
-	
+
 	# LaTeX color/size parameters
 	type_color = r"blue"
 	type_size = r"\scriptsize"
 	tex_color = r"black"
 	tex_size = r"\normalsize"
-	
+
 	# Templates (TeX)
 	pretex1 = r"\(\def\sp{^}\def\sb{_}\def\leqno(#1){}\)"
 	pretex2 = r"\(\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}\)"
@@ -138,27 +138,27 @@ options:
 	pretex = pretex1+pretex2+pretex3+pretex4
 	ljax = r"$$"  # variants: r"\("
 	rjax = r"$$"  #           r"\)"
-	
+
 	# texout_types.format(tex_color,tex_size,tex,type_color,type_size,type)
 	texout_types = r"""
 	{{\color{{{0}}} {1} {2}}} \\[0.9ex] {{\color{{{3}}} {4} \text{{{5}}}}} \\
 	"""
-	
+
 	# texout.format(tex_color,tex_size,tex)
 	texout = r"""
 	{{\color{{{0}}} {1} {2}}}
 	"""
 
-The options above are certainly self-explanatory. 
+The options above are certainly self-explanatory.
 
 Gnuplot
 ^^^^^^^
 For the built-in Gnuplot feature:
 ::
-	
+
 	# gnuplot javascript files location
 	gpjsf = '/static/gpjs'
-	
+
 	# gnuplot canvas template (html5)
 	gptpl =r"""
 	<script src="{0}/canvastext.js"></script>
@@ -173,7 +173,7 @@ the Gnuplot Javascript files are served, i.e. correspondingly
 ::
 
    localhost:8888/static/gpjs
-   
+
 Note: there must be a symbolic link from the Gnuplot installation to this
 directory.
 
@@ -184,7 +184,7 @@ End of user config
 ^^^^^^^^^^^^^^^^^^
 If you make changes beyond this point, then you will be on your own:
 ::
-	
+
 	# ***************
 	# END user config
 	# ***************
@@ -192,9 +192,9 @@ If you make changes beyond this point, then you will be on your own:
 
 Extending the kernel
 --------------------
-The ``jfricas`` kernel is essentially a simple `Python wrapper kernel`_ that 
-can be extended according to the corresponding `Messaging in Jupyter`_ 
-documentation.  
+The ``jfricas`` kernel is essentially a simple `Python wrapper kernel`_ that
+can be extended according to the corresponding `Messaging in Jupyter`_
+documentation.
 
 
 .. _Python wrapper kernel: https://jupyter-client.readthedocs.io/en/stable/wrapperkernels.html

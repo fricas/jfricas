@@ -1,11 +1,11 @@
 # **************************************************************************
 # Purpose ...: jfricas (https://github.com/fricas/jfricas.pip)
 # Build .... : docker build -t jfricas:latest .
-# Test ..... : docker run -ti --rm --network=host 
+# Test ..... : docker run -ti --rm --network=host
 #                --env DISPLAY=:0 nilqed/jfricas:latest jupyter notebook
 # Version .. : 0.2.17 -- 17-SEP-2019
 # OS ....... : ubuntu:latest
-# FriCAS ... : fricas:latest 
+# FriCAS ... : fricas:latest
 # **************************************************************************
 
 FROM nilqed/fricas
@@ -43,14 +43,3 @@ RUN cd /root && \
     pip3 install . && \
     python3 -m jfricas.install_kernel && \
     cd /root
-
-
-
-
-
-
-
-    
-    
-    
-

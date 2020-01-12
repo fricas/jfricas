@@ -13,6 +13,4 @@ python3 -m twine check dist/*
 python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 # pypi.org
-# python3 -m twine upload dist/* 
-
-
+# python3 -m twine upload dist/*

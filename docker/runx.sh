@@ -7,5 +7,3 @@ docker run -ti --network=host --env DISPLAY=$DISPLAY nilqed/jfricas:latest jupyt
 docker ps -a
 xhost -local:root
 echo done.
-
-

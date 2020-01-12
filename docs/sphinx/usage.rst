@@ -6,7 +6,7 @@ Basic Usage
 
 Start the notebook server from the command line:
 ::
-    
+
 	jupyter notebook
 
 You should see the notebook open in your browser.
@@ -26,7 +26,7 @@ Chose the new ``FriCAS`` kernel by
 .. image:: pics/new_fricas.png
 
 If all goes as it should, you will see a similar output when entering the
-commands as in the picture below. 
+commands as in the picture below.
 
 .. image:: pics/versions.png
 
@@ -42,8 +42,8 @@ Input
 :Send key: ``Shift-Return``
 
 You may enter single line code followed by a ``Shift-Return``, i.e. hold
-down the ``Shift`` key, then press the ``Return`` key (**note** that 
-``--`` designates a commment in ``Fricas``). 
+down the ``Shift`` key, then press the ``Return`` key (**note** that
+``--`` designates a commment in ``Fricas``).
 
 .. image:: pics/single_line.png
 
@@ -54,7 +54,7 @@ or appropriately indented multi-line code:
 **Recall** that ``_`` denotes the line continuation character in ``FriCAS``.
 
 There are a lot of features in Jupyter, e.g. running all cells
- 
+
 .. image:: pics/run_all.png
 
 or a print preview (rendered HTML) which allows you to save the complete
@@ -70,7 +70,7 @@ The notebook may be terminated by
 ::
 
   )quit
-  
+
 or from the menu (preferred)
 ::
 
@@ -84,7 +84,7 @@ Code completion
 
 :Key: ``TAB``
 
-Code completion works as usual by pressing the ``TAB`` key 
+Code completion works as usual by pressing the ``TAB`` key
 
 .. image:: pics/code_completion.png
 
@@ -111,7 +111,7 @@ Accessing the shell
 
 To run a shell command (e.g. ``ls``), put a ``!`` in front of the command.
 **Note** that ``!`` must be the first character in the cell, otherwise it
-will not be interpreted as shell prefix character.  
+will not be interpreted as shell prefix character.
 
 .. image:: pics/shell_prefix.png
 
@@ -120,13 +120,13 @@ in the cell, as already remarked.
 
 .. image:: pics/shell_multiline.png
 
-The output of the last shell command (at least parts of it) is also 
-**stored** in the ``Fricas`` variable 
+The output of the last shell command (at least parts of it) is also
+**stored** in the ``Fricas`` variable
 ::
 
   __system_result
-  
- 
+
+
 .. image:: pics/system_result.png
 
 
@@ -152,10 +152,10 @@ kernel file and add ``globals`` to ``eval``.
 Editing files
 -------------
 There are many ways to create and edit files during a Jupyter notebook session.
-(certainly from the Jupyter main page). You can use the Fricas system 
+(certainly from the Jupyter main page). You can use the Fricas system
 command ``)edit``, provided the shell variable ``EDITOR`` has been set, or
 you may use any editor by prefixing ``!``, e.g. ``gedit``.
-  
+
 :example: ``!gedit``
 
 Create a new file ``test.input`` and enter the function definition
@@ -175,7 +175,7 @@ Read the function in by ``)read`` and try ``f(8)``:
 LaTeX output
 ------------
 
-:command: ``)set output tex on/off`` 
+:command: ``)set output tex on/off``
 
 Setting ``TeX`` output on, you will see both, algebraic and ``MathJax``
 output (**right-click** on the ``MathJax`` output to get a context menu).
@@ -183,7 +183,7 @@ output (**right-click** on the ``MathJax`` output to get a context menu).
 .. image:: pics/set_out_tex_on.png
 
 
-You have to turn the plain text output off if you do want the rendered 
+You have to turn the plain text output off if you do want the rendered
 output only: ``)set output algebra off``
 
 .. image:: pics/tex_algebra_off.png
@@ -192,7 +192,7 @@ output only: ``)set output algebra off``
 HTML from FriCAS
 ----------------
 
-:prefix: ``$HTML$`` 
+:prefix: ``$HTML$``
 
 There is an experimental feature that allows to return string output from
 Fricas which will be rendered as ``HTML`` if prefixed with ``$HTML$``:
@@ -203,7 +203,7 @@ A string (``Type: String``) like
 ::
 
    "$HTML$<h1>Header"
-   
+
 will appear as HTML header, while
 
 ::
@@ -216,24 +216,24 @@ Draw
 ----
 The ``draw`` commands of Fricas will work as as usually. You may save
 the plot as a ``Postscript`` file, then convert it to ``PNG`` and
-eventually insert it into the notebook. 
+eventually insert it into the notebook.
 
 .. image:: pics/draw.png
 
-:todo: ps2png 
+:todo: ps2png
 
 A simple (yet powerful) application to convert postscript images to ``PNG``
 is ``ps2png`` from the TtH_ and TtM_ packages
 ::
 
    !apt search ttm
-   
+
    tth-common/bionic,now 4.12+ds-2 amd64 [installed]
       auxiliary software material for TtH and TtM
 
    ttm/bionic 4.12+ds-2 amd64
       TeX/LaTeX to MathML converter
-      
+
 
 Install ``tth-common`` with ``apt`` then ``ps2png`` will be available.
 
@@ -242,10 +242,10 @@ notebook by
 ::
 
    ESC-M  (i.e. change to markdown mode)
-   
+
    ![text](pic.png)  (RETURN)
-   
-and the picture should appear.   
+
+and the picture should appear.
 
 :SYNOPSIS: ps2png
 
@@ -253,7 +253,7 @@ and the picture should appear.
 
        tth [options] [<file.tex] [>file.html] [2>err]
        tth [options] file.tex [2>err]
-       
+
        ttm [options] [<file.tex] [>file.xml] [2>err]
        ttm [options] file.tex [2>err]
 
@@ -273,9 +273,9 @@ and the picture should appear.
 Gnuplot (experimental)
 ----------------------
 Gnuplot_ (cited from the homepage) is a portable command-line driven graphing utility for Linux, OS/2, MS Windows, OSX, VMS, and many other platforms. It was originally created to allow scientists and students to visualize mathematical functions and data interactively, but has grown to support many non-interactive uses such as web scripting. It is also used as a plotting engine by third-party applications like Octave. Gnuplot has been supported and under active development since 1986.
- 
+
 To use Gnuplot_ in ``jfricas``, it is required to have installed a version which supports
-the ``canvas`` terminal, e.g. version 5.2 or later   
+the ``canvas`` terminal, e.g. version 5.2 or later
 ::
 
   sudo apt install gnuplot-nox
@@ -295,16 +295,16 @@ required to create a symbolic link (as in the example below)
   or in a notebook session (preferred)
 
   )python static_file_path
-  
+
   # In a shell console create the symbolic link correspondingly
-  ln -s /usr/share/gnuplot/gnuplot/5.2/js/ 
+  ln -s /usr/share/gnuplot/gnuplot/5.2/js/
     /home/kfp/.local/lib/python3.6/site-packages/notebook/static/gpjs
 
   # Start a notebook and check if it is ok by
   http://localhost:8888/static/gpjs/canvastext.js
 
 
-:ref:  Gnuplot_ 
+:ref:  Gnuplot_
 
 
 .. image:: pics/gnuplot_test.png
@@ -329,14 +329,14 @@ Help
 
 Syntax Highlighting
 -------------------
-For those who like syntax highlighting there is a *codemirror mode* 
+For those who like syntax highlighting there is a *codemirror mode*
 file, ``spad.js`` in  the folder ``docs/static``.
 This file should be served from
 ::
 
     localhost:8888/static/components/codemirror/mode/spad/spad.js
 
-In order to install it, we first have to find the ``static`` directory of the 
+In order to install it, we first have to find the ``static`` directory of the
 Jupyter notebook.
 ::
 
@@ -356,11 +356,10 @@ Jupyter notebook.
 Next time you start a notebook the mode will be loaded, and you should see coloured
 keywords and built-in's like ``if, then, else, for ,repeat ...``.
 
-..  image:: pics/codemirror.png 
+..  image:: pics/codemirror.png
 
-You may add more keywords by editing the file ``spad.js`` directly. 
+You may add more keywords by editing the file ``spad.js`` directly.
 Thanks to `Bill Page`_ who provided ``axiom.js``, on which ``spad.js``
 is based.
 
 .. _Bill Page: https://github.com/billpage/CodeMirror/blob/master/mode/axiom/axiom.js
-

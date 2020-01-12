@@ -57,47 +57,47 @@
 
 
 (defun webspad-eval (s)
-    
-    (setf fmt (make-ws-format)) 
+
+    (setf fmt (make-ws-format))
     (setf out (make-ws-out-stream))
-    
+
     (setf data (make-webspad-data :input s :format-flags fmt))
-    
-    (progn (setf (ws-out-stream-stdout out) boot::*standard-output*) 
-           (setf (ws-out-stream-stderr out) boot::*error-output*) 
+
+    (progn (setf (ws-out-stream-stdout out) boot::*standard-output*)
+           (setf (ws-out-stream-stderr out) boot::*error-output*)
          (setf boot::*standard-output* (make-string-output-stream))
          (setf boot::*error-output* (make-string-output-stream)))
-    
-    
-    (if (ws-format-tex fmt) 
-        (progn (setf (ws-out-stream-tex out) boot::|$texOutputStream|) 
+
+
+    (if (ws-format-tex fmt)
+        (progn (setf (ws-out-stream-tex out) boot::|$texOutputStream|)
          (setf boot::|$texOutputStream| (make-string-output-stream))))
-          
-    (if (ws-format-html fmt) 
-        (progn (setf (ws-out-stream-html out) boot::|$htmlOutputStream|) 
+
+    (if (ws-format-html fmt)
+        (progn (setf (ws-out-stream-html out) boot::|$htmlOutputStream|)
          (setf boot::|$htmlOutputStream| (make-string-output-stream))))
-          
-    (if (ws-format-mathml fmt) 
-        (progn (setf (ws-out-stream-mathml out) boot::|$mathmlOutputStream|) 
+
+    (if (ws-format-mathml fmt)
+        (progn (setf (ws-out-stream-mathml out) boot::|$mathmlOutputStream|)
          (setf boot::|$mathmlOutputStream| (make-string-output-stream))))
-                    
-    (if (ws-format-formula fmt) 
-        (progn (setf (ws-out-stream-formula out) boot::|$formulaOutputStream|) 
+
+    (if (ws-format-formula fmt)
+        (progn (setf (ws-out-stream-formula out) boot::|$formulaOutputStream|)
          (setf boot::|$formulaOutputStream| (make-string-output-stream))))
-          
-    (if (ws-format-fortran fmt) 
-        (progn (setf (ws-out-stream-fortran out) boot::|$fortranOutputStream|) 
+
+    (if (ws-format-fortran fmt)
+        (progn (setf (ws-out-stream-fortran out) boot::|$fortranOutputStream|)
          (setf boot::|$fortranOutputStream| (make-string-output-stream))))
- 
-    (if (ws-format-texmacs fmt) 
-        (progn (setf (ws-out-stream-texmacs out) boot::|$texmacsOutputStream|) 
+
+    (if (ws-format-texmacs fmt)
+        (progn (setf (ws-out-stream-texmacs out) boot::|$texmacsOutputStream|)
            (setf boot::|$texmacsOutputStream| (make-string-output-stream))))
-          
-    (if (ws-format-openmath fmt) 
-        (progn 
-           (setf (ws-out-stream-openmath out) boot::|$openMathOutputStream|) 
+
+    (if (ws-format-openmath fmt)
+        (progn
+           (setf (ws-out-stream-openmath out) boot::|$openMathOutputStream|)
            (setf boot::|$openMathOutputStream| (make-string-output-stream))))
-    
+
     (setf s (let ((nl (count #\newline s)))
       (if (> nl 0)
         (when t (with-open-file
@@ -106,60 +106,60 @@
            (setf (webspad-data-multiline? data) t)
            (format nil ")read ~S )quiet )ifthere" +SPAD-TMP+))
          s)))
-    
+
     (setf alg (boot::|parseAndEvalToString| s))
-    
- 
-    (progn (setf (webspad-data-stdout data) 
+
+
+    (progn (setf (webspad-data-stdout data)
                    (get-output-stream-string boot::*standard-output*))
-           (setf (webspad-data-stderr data) 
+           (setf (webspad-data-stderr data)
                    (get-output-stream-string boot::*error-output*))
            (setf boot::*standard-output* (ws-out-stream-stdout out))
            (setf boot::*error-output* (ws-out-stream-stderr out)))
-             
-    
-    (if (ws-format-tex fmt) 
-        (progn (setf (webspad-data-tex data) 
+
+
+    (if (ws-format-tex fmt)
+        (progn (setf (webspad-data-tex data)
                    (get-output-stream-string boot::|$texOutputStream|))
            (setf boot::|$texOutputStream| (ws-out-stream-tex out))))
-          
-    (if (ws-format-html fmt) 
+
+    (if (ws-format-html fmt)
         (progn (setf (webspad-data-html data)
                    (get-output-stream-string boot::|$htmlOutputStream|))
            (setf boot::|$htmlOutputStream| (ws-out-stream-html out))))
-          
-    (if (ws-format-mathml fmt) 
+
+    (if (ws-format-mathml fmt)
         (progn (setf (webspad-data-mathml data)
                    (get-output-stream-string boot::|$mathmlOutputStream|))
            (setf boot::|$matmlOutputStream| (ws-out-stream-mathml out))))
-          
-    (if (ws-format-formula fmt) 
+
+    (if (ws-format-formula fmt)
         (progn (setf (webspad-data-formula data)
                    (get-output-stream-string boot::|$formulaOutputStream|))
-           (setf boot::|$formulaOutputStream| (ws-out-stream-formula out))))        
-          
-    (if (ws-format-fortran fmt) 
+           (setf boot::|$formulaOutputStream| (ws-out-stream-formula out))))
+
+    (if (ws-format-fortran fmt)
         (progn (setf (webspad-data-fortran data)
                    (get-output-stream-string boot::|$fortranOutputStream|))
            (setf boot::|$fortranOutputStream| (ws-out-stream-fortran out))))
 
-    (if (ws-format-texmacs fmt) 
+    (if (ws-format-texmacs fmt)
         (progn (setf (webspad-data-texmacs data)
                    (get-output-stream-string boot::|$texmacsOutputStream|))
-           (setf boot::|$texmacsOutputStream| (ws-out-stream-texmacs out))))        
-          
-    (if (ws-format-openmath fmt) 
+           (setf boot::|$texmacsOutputStream| (ws-out-stream-texmacs out))))
+
+    (if (ws-format-openmath fmt)
         (progn (setf (webspad-data-openmath data)
                    (get-output-stream-string boot::|$openMathOutputStream|))
            (setf boot::|$openMathOutputStream| (ws-out-stream-openmath out))))
-    
+
     (setf (webspad-data-algebra data) (get-algform alg))
     (setf (webspad-data-spad-type data) (get-type-string alg))
     (setf (webspad-data-charybdis data) (get-charybdis alg))
     data)
-          
- 
-          
+
+
+
 (defun webspad-eval-if-texformat (s)
   (let ((*package* (find-package :boot)))
     (let ((tmpout (make-string-output-stream))
@@ -208,7 +208,7 @@
     (format nil "~{~A~%~}" result))
 
 (defun get-type-string (result)
-    (if (has-type result) 
+    (if (has-type result)
         (get-type result) ""))
 
 
@@ -269,8 +269,8 @@
                    (bool-to-str (ws-format-fortran flags))
                    (bool-to-str (ws-format-texmacs flags))
                    (bool-to-str (ws-format-openmath flags))))
-                   
-                   
+
+
 ;;; ======
 ;;; SERVER
 ;;; ======
@@ -312,14 +312,8 @@
 
 
 (defun start (port address)
-  (hunchentoot:start 
-    (make-instance 'hunchentoot:easy-acceptor :port port :address address))) 
-  
-; usage: )lisp (defvar webspad::fricas-acceptor (webspad::start 4242 "localhost"))   
+  (hunchentoot:start
+    (make-instance 'hunchentoot:easy-acceptor :port port :address address)))
+
+; usage: )lisp (defvar webspad::fricas-acceptor (webspad::start 4242 "localhost"))
 ;  )lisp (hunchentoot::acceptor-port webspad::fricas-acceptor)
-
-
-
-
-                 
-
