@@ -68,6 +68,7 @@ gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
+#fricas_terminal = ['gnome-terminal', '--title=jfricas', '-x']
 
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
@@ -240,6 +241,10 @@ class SPAD(Kernel):
             if ff['mathml']=='true':
                 data['text/mathml'] = self.server.output['mathml']
 
+            if ff['formatted']=='true':
+                fmt = self.server.output['formatted']
+                typ = self.server.output['spad-type']
+                data['text/latex'] = makeFormattedType(fmt,typ)
 
         charybdis = self.server.output['charybdis']
         standard_output = self.server.output['stdout']
@@ -385,6 +390,13 @@ def makeTeXType(rawtex,rawtype):
     r = texout_types.format(tex_color,tex_size,r,type_color,type_size,rawtype)
     r = pretex + ljax + r + rjax
     return r
+
+
+def makeFormattedType(rawfmt,rawtype):
+    #r = rawtex.strip().strip('$$')
+    #r = texout_types.format(tex_color,tex_size,r,type_color,type_size,rawtype)
+    #r = pretex + ljax + r + rjax
+    return rawfmt
 
 
 ### cat spadcmd.txt | par 85j > spadcmd85.txt

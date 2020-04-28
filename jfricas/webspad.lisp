@@ -18,7 +18,7 @@
     (tex      boot::|$texFormat|)
     (html     boot::|$htmlFormat|)
     (mathml   boot::|$mathmlFormat|)
-    (formula  boot::|$formulaFormat|)
+    (formatted   boot::|$formatFormatted|)
     (fortran  boot::|$fortranFormat|)
     (texmacs  boot::|$texmacsFormat|)
     (openmath boot::|$openMathFormat|))
@@ -32,7 +32,7 @@
     (tex      nil)
     (html     nil)
     (mathml   nil)
-    (formula  nil)
+    (formatted   nil)
     (fortran  nil)
     (texmacs  nil)
     (openmath nil))
@@ -49,7 +49,7 @@
     (tex             ""       :type string  )
     (html            ""       :type string  )
     (mathml          ""       :type string  )
-    (formula         ""       :type string  )
+    (formatted       ""       :type string  )
     (fortran         ""       :type string  )
     (texmacs         ""       :type string  )
     (openmath        ""       :type string  )
@@ -81,9 +81,9 @@
         (progn (setf (ws-out-stream-mathml out) boot::|$mathmlOutputStream|)
          (setf boot::|$mathmlOutputStream| (make-string-output-stream))))
 
-    (if (ws-format-formula fmt)
-        (progn (setf (ws-out-stream-formula out) boot::|$formulaOutputStream|)
-         (setf boot::|$formulaOutputStream| (make-string-output-stream))))
+    (if (ws-format-formatted fmt)
+         (progn (setf (ws-out-stream-formatted out) boot::|$formattedOutputStream|)
+         (setf boot::|$formattedOutputStream| (make-string-output-stream))))
 
     (if (ws-format-fortran fmt)
         (progn (setf (ws-out-stream-fortran out) boot::|$fortranOutputStream|)
@@ -133,10 +133,10 @@
                    (get-output-stream-string boot::|$mathmlOutputStream|))
            (setf boot::|$mathmlOutputStream| (ws-out-stream-mathml out))))
 
-    (if (ws-format-formula fmt)
-        (progn (setf (webspad-data-formula data)
-                   (get-output-stream-string boot::|$formulaOutputStream|))
-           (setf boot::|$formulaOutputStream| (ws-out-stream-formula out))))
+    (if (ws-format-formatted fmt)
+        (progn (setf (webspad-data-formatted data)
+                   (get-output-stream-string boot::|$formattedOutputStream|))
+            (setf boot::|$formattedOutputStream| (ws-out-stream-formatted out))))
 
     (if (ws-format-fortran fmt)
         (progn (setf (webspad-data-fortran data)
@@ -220,7 +220,7 @@
                  \"tex\":~S,~
                  \"html\":~S,~
                  \"mathml\":~S,~
-                 \"formula\":~S,~
+                 \"formatted\":~S,~
                  \"fortran\":~S,~
                  \"texmacs\":~S,~
                  \"openmath\":~S,~
@@ -229,7 +229,7 @@
                    \"tex\":~S,~
                    \"html\":~S,~
                    \"mathml\":~S,~
-                   \"formula\":~S,~
+                   \"formatted\":~S,~
                    \"fortran\":~S,~
                    \"texmcas\":~S,~
                    \"openmath\":~S~
@@ -244,7 +244,7 @@
                    (webspad-data-tex data)
                    (webspad-data-html data)
                    (webspad-data-mathml data)
-                   (webspad-data-formula data)
+                   (webspad-data-formatted data)
                    (webspad-data-fortran data)
                    (webspad-data-texmacs data)
                    (webspad-data-openmath data)
@@ -252,7 +252,7 @@
                    (bool-to-str (ws-format-tex flags))
                    (bool-to-str (ws-format-html flags))
                    (bool-to-str (ws-format-mathml flags))
-                   (bool-to-str (ws-format-formula flags))
+                   (bool-to-str (ws-format-formatted flags))
                    (bool-to-str (ws-format-fortran flags))
                    (bool-to-str (ws-format-texmacs flags))
                    (bool-to-str (ws-format-openmath flags))))
