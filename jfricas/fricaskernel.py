@@ -67,8 +67,8 @@ shutd = ')shutdown'
 gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
-fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
-#fricas_terminal = ['gnome-terminal', '--title=jfricas', '-x']
+#fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
+fricas_terminal = ['gnome-terminal', '--title=jfricas', '-x']
 
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
@@ -246,30 +246,28 @@ class SPAD(Kernel):
                 typ = self.server.output['spad-type']
                 data['text/latex'] = makeFormattedType(fmt,typ)
 
+
+        algebra = self.server.output['algebra']
         charybdis = self.server.output['charybdis']
         standard_output = self.server.output['stdout']
         spadtype = self.server.output['spad-type']
 
-
         if not silent:
-            if ff['algebra'] == 'true':
-                if charybdis != "":
-                    if spadtype == "String":
-                        alg = self.server.output['algebra'].strip().strip('"')
-                        if alg.startswith(html_prefix):
-                           data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
-                           stdout = {'name': 'stdout', 'text': standard_output}
-                        else:
-                           stdout = {'name': 'stdout', 'text': charybdis}
-                    else:
-                        stdout = {'name': 'stdout', 'text': charybdis}
-                else:
-                    stdout = {'name': 'stdout', 'text': standard_output}
+            stdouttext = standard_output
+
+            # Special feature for treating HTML strings like
+            # "$HTML$ Ein <span style=_"color:red_">rotes</span> Wort"
+            if (ff['algebra'] == 'true') and (charybdis != ""):
+                stdouttext = algebra
+                if spadtype == "String":
+                    alg = algebra.strip().strip('"')
+                    if alg.startswith(html_prefix):
+                        stdouttext = standard_output
+                        data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
+
+            if stdouttext != "":
+                stdout = {'name': 'stdout', 'text': stdouttext}
                 self.send_response(self.iopub_socket, 'stream', stdout)
-            else:
-                if standard_output != "":
-                    stdout = {'name': 'stdout', 'text': standard_output}
-                    self.send_response(self.iopub_socket, 'stream', stdout)
 
             # Error handling (red)
             if charybdis.startswith("error"):
@@ -393,10 +391,18 @@ def makeTeXType(rawtex,rawtype):
 
 
 def makeFormattedType(rawfmt,rawtype):
-    #r = rawtex.strip().strip('$$')
-    #r = texout_types.format(tex_color,tex_size,r,type_color,type_size,rawtype)
-    #r = pretex + ljax + r + rjax
-    return rawfmt
+    FMJ='FormatMathJax\hrulefill'
+    FLT='FormatLaTeX\hrulefill'
+    F2D='Format2D\hrulefill'
+    #
+    if rawfmt.startswith(FMJ):
+        return rawfmt.split(FMJ)[1].strip()
+    if rawfmt.startswith(FLT):
+        return rawfmt.split(FLT)[1].strip()
+    if rawfmt.startswith(F2D):
+        return rawfmt.split(F2D)[1].strip()
+    # usw.
+    return ('Unknown format:'+rawfmt)
 
 
 ### cat spadcmd.txt | par 85j > spadcmd85.txt
