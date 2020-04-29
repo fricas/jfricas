@@ -160,19 +160,6 @@
 
 
 
-(defun webspad-eval-if-texformat (s)
-  (let ((*package* (find-package :boot)))
-    (let ((tmpout (make-string-output-stream))
-          (save boot::|$texOutputStream|))
-      (setq boot::|$texOutputStream| tmpout)
-      (let ((alg (boot::|parseAndEvalToString| s))
-            (tex (get-output-stream-string boot::|$texOutputStream|)))
-        (setq boot::|$texOutputStream| save)
-            (make-webspad-data :input s
-                               :algebra (get-algform alg)
-                               :spad-type  (get-type-string alg)
-                               :tex tex)))))
-
 (defun webspad-eval-default (s)
     (let ((alg (boot::|parseAndEvalToString| s)))
         (make-webspad-data :input s
