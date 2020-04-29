@@ -131,7 +131,7 @@
     (if (ws-format-mathml fmt)
         (progn (setf (webspad-data-mathml data)
                    (get-output-stream-string boot::|$mathmlOutputStream|))
-           (setf boot::|$matmlOutputStream| (ws-out-stream-mathml out))))
+           (setf boot::|$mathmlOutputStream| (ws-out-stream-mathml out))))
 
     (if (ws-format-formula fmt)
         (progn (setf (webspad-data-formula data)
