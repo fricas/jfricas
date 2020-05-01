@@ -182,14 +182,21 @@ class SPAD(Kernel):
     def do_execute(self, code, silent, store_history=True,
                    user_expressions=None, allow_stdin=False):
 
+        ok_status = {
+            'status': 'ok',
+            # The base class increments the execution count
+            'execution_count': self.execution_count,
+            'payload': [],
+            'user_expressions': {},
+        }
+
         # pre-process input
         if code.startswith(pycmd):
             # Python code in cell
             self.output = str(eval(code[len(pycmd):].lstrip()))
-            pyeval = {'name': 'stdout', 'text': self.output}
-            self.send_response(self.iopub_socket, 'stream', pyeval)
-            return {'status': 'ok', 'execution_count': self.execution_count,
-                    'payload': [], 'user_expressions': {},}
+            self.send_response(self.iopub_socket, 'stream',
+                               {'name': 'stdout', 'text': self.output})
+            return ok_status
 
         if code.startswith(shutd):
             # Shutdown requested
@@ -199,93 +206,43 @@ class SPAD(Kernel):
             # Shell code in cell
             global shell_result
             cmd = str(code[len(shcmd):].lstrip())
-            cp = run(cmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
+            cp = run(cmd, stdout=PIPE, stderr=STDOUT,
+                          timeout=shell_timeout, shell=True)
             self.output = cp.stdout.decode()
-            sheval = {'name': 'stdout', 'text': self.output}
-            self.send_response(self.iopub_socket, 'stream', sheval)
+            self.send_response(self.iopub_socket, 'stream',
+                               {'name': 'stdout', 'text': self.output})
+
+            # Storel last shell result in global python variable
             shell_result = self.output
+
+            # store last shell result inside FriCAS
             self.server.put(shell_result_fricas.format(self.output))
-            return {'status': 'ok', 'execution_count': self.execution_count,
-                    'payload': [], 'user_expressions': {},}
+
+            return ok_status
 
         if code.startswith(gplot):
             # gnuplot
-            gdata = dict()
-            cmdl = code[len(gplot):].lstrip().split('\n')
-            cmd = ';'.join(cmdl)
+            data = dict()
+            commands = code[len(gplot):].lstrip().split('\n')
+            cmd = ';'.join(commands)
             uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
-            gcmd = 'gnuplot -e "set term canvas name {0};{1}"'.format("'"+uid+"'",cmd)
-            gcp = run(gcmd, stdout=PIPE, stderr=STDOUT, timeout=shell_timeout, shell=True)
-            gjs = gcp.stdout.decode()
-            gdata['text/html'] = gptpl.format(gpjsf, uid, gjs, uid)
-            display_data = {'data':gdata, 'metadata':{}}
-            self.send_response(self.iopub_socket, 'display_data', display_data)
-            return {'status': 'ok', 'execution_count': self.execution_count,
-                    'payload': [], 'user_expressions': {},}
+            cmd = 'gnuplot -e "set term canvas name {0};{1}"'.format(
+                                                     "'"+uid+"'",cmd)
+            cp = run(cmd, stdout=PIPE, stderr=STDOUT,
+                          timeout=shell_timeout, shell=True)
+            js = cp.stdout.decode()
+            data['text/html'] = gptpl.format(gpjsf, uid, js, uid)
+            self.send_response(self.iopub_socket, 'display_data',
+                               {'data': data, 'metadata': {}})
+            return ok_status
 
-        # send code to hunchentoot and get response
+        # send code to hunchentoot and get response from FriCAS
         r = self.server.put(code)
         data = dict()
-        if r.ok:
+        if r.ok and not silent:
+            handle_fricas_result(self, r)
 
-            ff = self.server.output['format-flags']
-
-            if ff['tex']=='true':
-                tex = self.server.output['tex']
-                typ = self.server.output['spad-type']
-                data['text/latex'] = makeTeXType(tex,typ)
-
-            if ff['html']=='true':
-                data['text/html'] = self.server.output['html']
-
-            if ff['mathml']=='true':
-                data['text/mathml'] = self.server.output['mathml']
-
-            if ff['formatted']=='true':
-                fmt = self.server.output['formatted']
-                typ = self.server.output['spad-type']
-                data['text/latex'] = makeFormattedType(fmt,typ)
-
-
-        algebra = self.server.output['algebra']
-        charybdis = self.server.output['charybdis']
-        standard_output = self.server.output['stdout']
-        spadtype = self.server.output['spad-type']
-
-        if not silent:
-            stdouttext = standard_output
-
-            # Special feature for treating HTML strings like
-            # "$HTML$ Ein <span style=_"color:red_">rotes</span> Wort"
-            if (ff['algebra'] == 'true') and (charybdis != ""):
-                stdouttext = algebra
-                if spadtype == "String":
-                    alg = algebra.strip().strip('"')
-                    if alg.startswith(html_prefix):
-                        stdouttext = standard_output
-                        data['text/html']  = alg[len(html_prefix):].rstrip().rstrip('"')
-
-            if stdouttext != "":
-                stdout = {'name': 'stdout', 'text': stdouttext}
-                self.send_response(self.iopub_socket, 'stream', stdout)
-
-            # Error handling (red)
-            if charybdis.startswith("error"):
-                stderr = {'name': 'stderr', 'text': standard_output}
-                self.send_response(self.iopub_socket, 'stream', stderr)
-
-
-            # Display LaTeX, HTML, MathML ...
-            display_data = {'data':data, 'metadata':{}}
-            self.send_response(self.iopub_socket, 'display_data', display_data)
-
-
-        return {'status': 'ok',
-                # The base class increments the execution count
-                'execution_count': self.execution_count,
-                'payload': [],
-                'user_expressions': {},
-               }
+        return ok_status
 
     def do_complete(self, code, cursor_pos):
         code = code[:cursor_pos]
@@ -377,6 +334,53 @@ class SPAD(Kernel):
 #         "openmath":"false"}}
 
 
+
+def handle_fricas_result(self, r):
+        out = self.server.output
+        ff = out['format-flags']
+        data = dict()
+
+        # Error handling (red)
+        if out['charybdis'].startswith("error"):
+            stderr = {'name': 'stderr', 'text': standard_output}
+            self.send_response(self.iopub_socket, 'stream', stderr)
+            return
+
+        if out['spad-type'] != "":
+            self.send_response(self.iopub_socket, 'stream',
+                {'name': 'stdout', 'text': out['spad-type'] + "\n"})
+
+        if (ff['algebra'] == 'true') and (out['algebra'] != ""):
+            self.send_response(self.iopub_socket, 'stream',
+                               {'name': 'stdout', 'text': out['algebra']})
+
+        if out['stdout'] != "":
+            self.send_response(self.iopub_socket, 'stream',
+                               {'name': 'stdout', 'text': out['stdout']})
+
+        if ff['tex']=='true':
+            fmt = makeTeXType(out['tex'], out['spad-type'])
+            self.send_response(self.iopub_socket, 'display_data',
+                {'data': {'text/latex': fmt}, 'metadata': {}})
+
+        if ff['html']=='true':
+            self.send_response(self.iopub_socket, 'display_data',
+                {'data': {'text/html': out['html']}, 'metadata': {}})
+
+        if ff['mathml']=='true':
+            self.send_response(self.iopub_socket, 'display_data',
+                {'data': {'text/mathml': out['mathml']}, 'metadata': {}})
+
+        if ff['formatted']=='true':
+            fmt = out['formatted']
+            typ = out['spad-type']
+            data['text/latex'] = makeFormattedType(fmt,typ)
+
+        # Display LaTeX, HTML, MathML ...
+        display_data = {'data': data, 'metadata': {}}
+        self.send_response(self.iopub_socket, 'display_data', display_data)
+
+
 def makeTeX(rawtex):
     r = rawtex.strip().strip('$$')
     r = texout.format(tex_color,tex_size,r)
@@ -404,8 +408,6 @@ def makeFormattedType(rawfmt,rawtype):
     # usw.
     return ('Unknown format:'+rawfmt)
 
-
-### cat spadcmd.txt | par 85j > spadcmd85.txt
 
 command_list="""
 AND  Aleph  An   And  B1solve  BY  BasicMethod  Beta  BumInSepFFE   Chi  Ci  D  Delta
