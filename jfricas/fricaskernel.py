@@ -74,8 +74,6 @@ shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
 shell_result_fricas = '__system_result:="{0}"' # store sh result in Fricas
 
-html_prefix = '$HTML$'
-
 # LaTeX color/size parameters
 type_color = r"blue"
 type_size = r"\scriptsize"
@@ -336,77 +334,62 @@ class SPAD(Kernel):
 
 
 def handle_fricas_result(self, r):
-        out = self.server.output
-        ff = out['format-flags']
-        data = dict()
+    out = self.server.output
+    ff = out['format-flags']
+    data = dict()
 
-        # Error handling (red)
-        if out['charybdis'].startswith("error"):
-            stderr = {'name': 'stderr', 'text': standard_output}
-            self.send_response(self.iopub_socket, 'stream', stderr)
-            return
+    # Error handling (red)
+    if out['charybdis'].startswith("error"):
+        stderr = {'name': 'stderr', 'text': out['stdout']}
+        self.send_response(self.iopub_socket, 'stream', stderr)
+        return
 
-        if out['spad-type'] != "":
-            self.send_response(self.iopub_socket, 'stream',
-                {'name': 'stdout', 'text': out['spad-type'] + "\n"})
+    if out['spad-type'] != "":
+        self.send_response(self.iopub_socket, 'stream',
+            {'name': 'stdout', 'text': out['spad-type'] + "\n"})
 
-        if (ff['algebra'] == 'true') and (out['algebra'] != ""):
-            self.send_response(self.iopub_socket, 'stream',
-                               {'name': 'stdout', 'text': out['algebra']})
+    if (ff['algebra'] == 'true') and (out['algebra'] != ""):
+        self.send_response(self.iopub_socket, 'stream',
+            {'name': 'stdout', 'text': out['algebra']})
 
-        if out['stdout'] != "":
-            self.send_response(self.iopub_socket, 'stream',
-                               {'name': 'stdout', 'text': out['stdout']})
+    if out['stdout'] != "":
+        self.send_response(self.iopub_socket, 'stream',
+            {'name': 'stdout', 'text': out['stdout']})
 
-        if ff['tex']=='true':
-            fmt = makeTeXType(out['tex'], out['spad-type'])
-            self.send_response(self.iopub_socket, 'display_data',
-                {'data': {'text/latex': fmt}, 'metadata': {}})
+    if ff['tex']=='true':
+        r = out['tex'].strip().strip('$$')
+        r = texout_types.format(tex_color, tex_size, r,
+                                type_color, type_size,  out['spad-type'])
+        fmt = pretex + ljax + r + rjax
+        self.send_response(self.iopub_socket, 'display_data',
+            {'data': {'text/latex': fmt}, 'metadata': {}})
 
-        if ff['html']=='true':
-            self.send_response(self.iopub_socket, 'display_data',
-                {'data': {'text/html': out['html']}, 'metadata': {}})
+    if ff['html']=='true':
+        self.send_response(self.iopub_socket, 'display_data',
+            {'data': {'text/html': out['html']}, 'metadata': {}})
 
-        if ff['mathml']=='true':
-            self.send_response(self.iopub_socket, 'display_data',
-                {'data': {'text/mathml': out['mathml']}, 'metadata': {}})
+    if ff['mathml']=='true':
+        self.send_response(self.iopub_socket, 'display_data',
+            {'data': {'text/html': out['mathml']}, 'metadata': {}})
 
-        if ff['formatted']=='true':
-            fmt = out['formatted']
-            typ = out['spad-type']
-            data['text/latex'] = makeFormattedType(fmt,typ)
+    if ff['formatted']!='true': return
 
-        # Display LaTeX, HTML, MathML ...
-        display_data = {'data': data, 'metadata': {}}
-        self.send_response(self.iopub_socket, 'display_data', display_data)
+    lines = out['formatted'].split('\n')
+    while lines:
+        line = lines[0]
+        lines.pop(0)
+        if line.startswith("--BEGIN-FORMAT:"):
+            formatter = line.split(':')[1]
+            e = "--END-FORMAT:" + formatter
+            f = ""
+            while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
+            if formatter == 'FormatMathJax':
+                self.send_response(self.iopub_socket, 'display_data',
+                    {'data': {'text/latex': f}, 'metadata': {}})
+            else:
+                self.send_response(self.iopub_socket, 'stream',
+                    {'name': 'stdout', 'text': f})
 
-
-def makeTeX(rawtex):
-    r = rawtex.strip().strip('$$')
-    r = texout.format(tex_color,tex_size,r)
-    r = pretex + ljax + r + rjax
-    return r
-
-def makeTeXType(rawtex,rawtype):
-    r = rawtex.strip().strip('$$')
-    r = texout_types.format(tex_color,tex_size,r,type_color,type_size,rawtype)
-    r = pretex + ljax + r + rjax
-    return r
-
-
-def makeFormattedType(rawfmt,rawtype):
-    FMJ='FormatMathJax\hrulefill'
-    FLT='FormatLaTeX\hrulefill'
-    F2D='Format2D\hrulefill'
-    #
-    if rawfmt.startswith(FMJ):
-        return rawfmt.split(FMJ)[1].strip()
-    if rawfmt.startswith(FLT):
-        return rawfmt.split(FLT)[1].strip()
-    if rawfmt.startswith(F2D):
-        return rawfmt.split(F2D)[1].strip()
-    # usw.
-    return ('Unknown format:'+rawfmt)
 
 
 command_list="""
