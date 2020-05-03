@@ -68,7 +68,7 @@ gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 #fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
-fricas_terminal = ['gnome-terminal', '--title=jfricas', '-x']
+fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
 
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
