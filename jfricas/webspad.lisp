@@ -160,13 +160,6 @@
 
 
 
-(defun webspad-eval-default (s)
-    (let ((alg (boot::|parseAndEvalToString| s)))
-        (make-webspad-data :input s
-                           :algebra  (get-algform alg)
-                           :spad-type  (get-type-string alg))))
-
-
 (defun spad-eval (code)
   (let ((*package* (find-package :boot))
         (alg (boot::|parseAndEvalToString| code)))
