@@ -236,10 +236,10 @@ class SPAD(Kernel):
 
         # send code to hunchentoot and get response from FriCAS
         r = self.server.put(code)
-        data = dict()
-        if r.ok and not silent:
-            handle_fricas_result(self, r)
+        self.send_response(self.iopub_socket, 'stream',
+                           {'name': 'stdout', 'text': str(r.text)})
 
+        if r.ok and not silent: handle_fricas_result(self)
         return ok_status
 
     def do_complete(self, code, cursor_pos):
@@ -291,88 +291,50 @@ class SPAD(Kernel):
         return {'status' : 'ok', 'found' : True, 'data' : data,
                 'metadata' : dict(),}
 
+###################################################################
+# Auxiliary functions
+###################################################################
 
-# Kernel spec kernel.json file for this:
-#
-# {"argv": ["python3", "-m","jfricas.fricaskernel","-f", "{connection_file}"],
-#   "display_name": "FriCAS", "language": "spad"}
-#
-# install it using e.g
-#   jupyter kernelspec install </path/to/dir-containing-kernel-json>.
-# Place your kernel module anywhere Python can import it
-# (try current directory for testing).
-# Finally, you can run your kernel using
-#  jupyter console --kernel=jfricas.
-#
+def maybe_send_to_stdout(self, s):
+    if s:
+        self.send_response(self.iopub_socket, 'stream',
+            {'name': 'stdout', 'text': s})
 
-# ===================
-# SPAD -> JSON Output
-# ===================
-#
-#  { "input":"D(x^n,x,4)",
-#    "multiline?":"false",
-#    "spad-type":"",
-#    "algebra":"",
-#    "charybdis":"",
-#    "tex":"",
-#    "html":"",
-#    "mathml":"",
-#    "formula":"",
-#    "fortran":"",
-#    "texmacs":"",
-#    "openmath":"",
-#    "format-flags":
-#        {"algebra":"true",
-#         "tex":"false",
-#         "html":"false",
-#         "mathml":"false",
-#         "formula":"false",
-#         "fortran":"false",
-#         "texmcas":"false",
-#         "openmath":"false"}}
+def maybe_send(self, content_type, s):
+    if s:
+        self.send_response(self.iopub_socket, 'display_data',
+            {'data': {content_type: s}, 'metadata': {}})
 
-
-
-def handle_fricas_result(self, r):
+def handle_fricas_result(self):
+    import sys
     out = self.server.output
-    ff = out['format-flags']
-    data = dict()
 
     # Error handling (red)
-    if out['charybdis'].startswith("error"):
-        stderr = {'name': 'stderr', 'text': out['stdout']}
-        self.send_response(self.iopub_socket, 'stream', stderr)
-        return
-
-    if out['spad-type'] != "":
+    if out['stderr'] != "":
         self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stdout', 'text': out['spad-type'] + "\n"})
+            {'name': 'stderr', 'text': out['stderr']})
 
-    if (ff['algebra'] == 'true') and (out['algebra'] != ""):
-        self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stdout', 'text': out['algebra']})
+    maybe_send_to_stdout(self, out['stdout'])
 
-    if out['stdout'] != "":
-        self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stdout', 'text': out['stdout']})
+    # Possibly contains the type and time
+    maybe_send_to_stdout(self, out['algebra'])
 
-    if ff['tex']=='true':
+    if out['tex']:
         r = out['tex'].strip().strip('$$')
-        r = texout_types.format(tex_color, tex_size, r,
-                                type_color, type_size,  out['spad-type'])
+        r = texout.format(tex_color, tex_size, r)
         fmt = pretex + ljax + r + rjax
-        self.send_response(self.iopub_socket, 'display_data',
-            {'data': {'text/latex': fmt}, 'metadata': {}})
+        maybe_send(self, 'text/latex', fmt)
 
-    if ff['html']=='true':
-        self.send_response(self.iopub_socket, 'display_data',
-            {'data': {'text/html': out['html']}, 'metadata': {}})
 
-    if ff['mathml']=='true':
-        self.send_response(self.iopub_socket, 'display_data',
-            {'data': {'text/html': out['mathml']}, 'metadata': {}})
+    maybe_send(self, 'text/html', out['html'])
+    maybe_send(self, 'text/html', out['mathml'])
 
-    if ff['formatted']!='true': return
+    maybe_send_to_stdout(self, out['fortran'])
+    maybe_send_to_stdout(self, out['texmacs'])
+    maybe_send_to_stdout(self, out['fortran'])
+    maybe_send_to_stdout(self, out['openmath'])
+
+    if not out['formatted']: return
 
     lines = out['formatted'].split('\n')
     while lines:
@@ -384,11 +346,9 @@ def handle_fricas_result(self, r):
             f = ""
             while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
             if formatter == 'FormatMathJax':
-                self.send_response(self.iopub_socket, 'display_data',
-                    {'data': {'text/latex': f}, 'metadata': {}})
+                maybe_send(self, 'text/latex', f)
             else:
-                self.send_response(self.iopub_socket, 'stream',
-                    {'name': 'stdout', 'text': f})
+                maybe_send_to_stdout(self, f)
 
 
 
