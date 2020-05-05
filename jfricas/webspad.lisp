@@ -18,6 +18,13 @@
           (|cacheKeyedMsg| |$defaultMsgDatabaseName|)))
         (HGET |$msg_hash| |key|)))))))
 
+; Following function calls FriCAS for evaluation of code and returns
+; true if ther is an error and nil otherwise.
+(DEFUN |webspad-parseAndEvalStr| (code)
+    (EQ (CATCH 'SPAD_READER (CATCH '|top_level| (boot::|parseAndEvalStr| code)))
+        '|restart|))
+
+
 ;;; ---------------------------------------------------------------
 
 (defpackage webspad
@@ -92,8 +99,8 @@
     (setf boot::*error-output*           (make-string-output-stream))
     (setf boot::*standard-output*        (make-string-output-stream))
 
-    ; output of the follwing command appears in the streams
-    (boot::|parseAndEvalStr| code)
+    ; eval and return true if there was an error
+    (setf err? (boot::|webspad-parseAndEvalStr| code))
 
     ; extract the output from the streams
     (setf (ws-data-algebra   data)
