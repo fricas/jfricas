@@ -38,8 +38,16 @@
 
 (in-package :webspad)
 
-(defstruct ws-data
-  (algebra   "" :type string)
+; Get result and sent back the stream to its original.
+(defmacro gr (v s saved)
+  `(progn
+    (setf ,v (get-output-stream-string ,s))
+    (setf ,s ,saved)))
+
+(defstruct r
+  (step      "" :type string) ; step number in FriCAs
+  (error?    "" :type string)
+  (algebra   "" :type string) ; optionally contains time and type
   (formatted "" :type string)
   (tex       "" :type string)
   (html      "" :type string)
@@ -57,7 +65,7 @@
 (defun webspad-eval (input)
   (let* (
         ; store original input argument
-         (data (make-ws-data :input input))
+         (data (make-r :step (format nil "~S" boot::|$IOindex|) :input input))
          ; Because we want to read from the fricas streams via
          ; get-output-stream-string, we must make sure that the
          ; streams are created via make-string-output-stream.
@@ -100,51 +108,19 @@
     (setf boot::*standard-output*        (make-string-output-stream))
 
     ; eval and return true if there was an error
-    (setf err? (boot::|webspad-parseAndEvalStr| code))
+    (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| code) "T" "F"))
 
-    ; extract the output from the streams
-    (setf (ws-data-algebra   data)
-          (get-output-stream-string boot::|$algebraOutputStream|))
-
-    (setf (ws-data-formatted data)
-          (get-output-stream-string boot::|$formattedOutputStream|))
-
-    (setf (ws-data-tex       data)
-          (get-output-stream-string boot::|$texOutputStream|))
-
-    (setf (ws-data-html      data)
-          (get-output-stream-string boot::|$htmlOutputStream|))
-
-    (setf (ws-data-mathml    data)
-          (get-output-stream-string boot::|$mathmlOutputStream|))
-
-    (setf (ws-data-fortran   data)
-          (get-output-stream-string boot::|$fortranOutputStream|))
-
-    (setf (ws-data-texmacs   data)
-          (get-output-stream-string boot::|$texmacsOutputStream|))
-
-    (setf (ws-data-openmath  data)
-          (get-output-stream-string boot::|$openMathOutputStream|))
-
-    (setf (ws-data-stderr    data)
-          (get-output-stream-string boot::*error-output*))
-
-    (setf (ws-data-stdout    data)
-          (get-output-stream-string boot::*standard-output*))
-
-    ; Put the old streams back.
-    (setf boot::|$algebraOutputStream|   s-algebra)
-    (setf boot::|$formattedOutputStream| s-formatted)
-    (setf boot::|$texOutputStream|       s-tex)
-    (setf boot::|$htmlOutputStream|      s-html)
-    (setf boot::|$mathmlOutputStream|    s-mathml)
-    (setf boot::|$formattedOutputStream| s-formatted)
-    (setf boot::|$fortranOutputStream|   s-fortran)
-    (setf boot::|$texmacsOutputStream|   s-texmacs)
-    (setf boot::|$openMathOutputStream|  s-openmath)
-    (setf boot::*error-output*           s-stderr)
-    (setf boot::*standard-output*        s-stdout)
+    ; extract the output from the streams and reset stream
+    (gr (r-algebra   data) boot::|$algebraOutputStream|   s-algebra)
+    (gr (r-formatted data) boot::|$formattedOutputStream| s-formatted)
+    (gr (r-tex       data) boot::|$texOutputStream|       s-tex)
+    (gr (r-html      data) boot::|$htmlOutputStream|      s-html)
+    (gr (r-mathml    data) boot::|$mathmlOutputStream|    s-mathml)
+    (gr (r-fortran   data) boot::|$fortranOutputStream|   s-fortran)
+    (gr (r-texmacs   data) boot::|$texmacsOutputStream|   s-texmacs)
+    (gr (r-openmath  data) boot::|$openMathOutputStream|  s-openmath)
+    (gr (r-stderr    data) boot::*error-output*           s-stderr)
+    (gr (r-stdout    data) boot::*standard-output*        s-stdout)
 
     ; return the data record
     data))
@@ -156,7 +132,9 @@
 (in-package :webspad)
 
 (defun encode-json (data)
-  (format nil "{ \"algebra\":~S,~
+  (format nil "{ \"step\":~S,~
+                 \"error?\":~S,~
+                 \"algebra\":~S,~
                  \"formatted\":~S,~
                  \"tex\":~S,~
                  \"html\":~S,~
@@ -168,17 +146,19 @@
                  \"stdout\":~S,~
                  \"input\":~S~
                }"
-          (ws-data-algebra data)
-          (ws-data-formatted data)
-          (ws-data-tex data)
-          (ws-data-html data)
-          (ws-data-mathml data)
-          (ws-data-fortran data)
-          (ws-data-texmacs data)
-          (ws-data-openmath data)
-          (ws-data-stderr data)
-          (ws-data-stdout data)
-          (ws-data-input data)))
+          (r-step data)
+          (r-error? data)
+          (r-algebra data)
+          (r-formatted data)
+          (r-tex data)
+          (r-html data)
+          (r-mathml data)
+          (r-fortran data)
+          (r-texmacs data)
+          (r-openmath data)
+          (r-stderr data)
+          (r-stdout data)
+          (r-input data)))
 
 
 ;;; ======

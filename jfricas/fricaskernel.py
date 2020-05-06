@@ -314,6 +314,9 @@ def handle_fricas_result(self):
         self.send_response(self.iopub_socket, 'stream',
             {'name': 'stderr', 'text': out['stderr']})
 
+    maybe_send_to_stdout(self, '--[[' + out['step']   + ']]--')
+    maybe_send_to_stdout(self, '--[[' + out['error?'] + ']]--')
+
     maybe_send_to_stdout(self, out['stdout'])
 
     # Possibly contains the type and time
