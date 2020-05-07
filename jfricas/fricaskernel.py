@@ -239,8 +239,9 @@ class SPAD(Kernel):
         self.send_response(self.iopub_socket, 'stream',
                            {'name': 'stdout', 'text': str(r.text)})
 
-        if r.ok and not silent: handle_fricas_result(self)
+        if r.ok and not silent: self.handle_fricas_result()
         return ok_status
+
 
     def do_complete(self, code, cursor_pos):
         code = code[:cursor_pos]
@@ -291,74 +292,72 @@ class SPAD(Kernel):
         return {'status' : 'ok', 'found' : True, 'data' : data,
                 'metadata' : dict(),}
 
-###################################################################
-# Auxiliary functions
-###################################################################
+    ###################################################################
+    # Auxiliary functions
+    ###################################################################
 
-def maybe_send_to_stdout(self, s):
-    if s:
-        self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stdout', 'text': s})
-
-def maybe_send(self, content_type, s):
-    if s:
-        self.send_response(self.iopub_socket, 'display_data',
-            {'data': {content_type: s}, 'metadata': {}})
-
-def handle_fricas_result(self):
-    import sys
-    out = self.server.output
-
-    # Error handling (red)
-    if out['stderr'] != "":
-        self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stderr', 'text': out['stderr']})
-
-    maybe_send_to_stdout(self, '--[[' + out['step']   + ']]--')
-    maybe_send_to_stdout(self, '--[[' + out['error?'] + ']]--')
-
-    if out['error?'] == 'T':
-        self.send_response(self.iopub_socket, 'stream',
-            {'name': 'stderr', 'text': 'ERROR\n' + out['algebra']})
-        out['algebra'] = ''
-
-    maybe_send_to_stdout(self, out['stdout'])
-
-    # Possibly contains the type and time
-    maybe_send_to_stdout(self, out['algebra'])
-
-    if out['tex']:
-        r = out['tex'].strip().strip('$$')
-        r = texout.format(tex_color, tex_size, r)
-        fmt = pretex + ljax + r + rjax
-        maybe_send(self, 'text/latex', fmt)
+    def maybe_send_to_stdout(self, s):
+        if s:
+            self.send_response(self.iopub_socket, 'stream',
+                               {'name': 'stdout', 'text': s})
 
 
-    maybe_send(self, 'text/html', out['html'])
-    maybe_send(self, 'text/html', out['mathml'])
-
-    maybe_send_to_stdout(self, out['fortran'])
-    maybe_send_to_stdout(self, out['texmacs'])
-    maybe_send_to_stdout(self, out['fortran'])
-    maybe_send_to_stdout(self, out['openmath'])
-
-    if not out['formatted']: return
-
-    lines = out['formatted'].split('\n')
-    while lines:
-        line = lines[0]
-        lines.pop(0)
-        if line.startswith("--BEGIN-FORMAT:"):
-            formatter = line.split(':')[1]
-            e = "--END-FORMAT:" + formatter
-            f = ""
-            while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
-            if formatter == 'FormatMathJax':
-                maybe_send(self, 'text/latex', f)
-            else:
-                maybe_send_to_stdout(self, f)
+    def maybe_send(self, content_type, s):
+        if s:
+            self.send_response(self.iopub_socket, 'display_data',
+                               {'data': {content_type: s}, 'metadata': {}})
 
 
+    def handle_fricas_result(self):
+        out = self.server.output
+
+        # Error handling (red)
+        if out['stderr'] != "":
+            self.send_response(self.iopub_socket, 'stream',
+                {'name': 'stderr', 'text': out['stderr']})
+
+        self.maybe_send_to_stdout( '--[[' + out['step']   + ']]--')
+        self.maybe_send_to_stdout('--[[' + out['error?'] + ']]--')
+
+        if out['error?'] == 'T':
+            self.send_response(self.iopub_socket, 'stream',
+                {'name': 'stderr', 'text': 'ERROR\n' + out['algebra']})
+            out['algebra'] = ''
+
+        self.maybe_send_to_stdout(out['stdout'])
+
+        # Possibly contains the type and time
+        self.maybe_send_to_stdout(out['algebra'])
+
+        if out['tex']:
+            r = out['tex'].strip().strip('$$')
+            r = texout.format(tex_color, tex_size, r)
+            fmt = pretex + ljax + r + rjax
+            self.maybe_send('text/latex', fmt)
+
+        self.maybe_send('text/html', out['html'])
+        self.maybe_send('text/html', out['mathml'])
+
+        self.maybe_send_to_stdout(out['fortran'])
+        self.maybe_send_to_stdout(out['texmacs'])
+        self.maybe_send_to_stdout(out['fortran'])
+        self.maybe_send_to_stdout(out['openmath'])
+
+        if not out['formatted']: return
+
+        lines = out['formatted'].split('\n')
+        while lines:
+            line = lines[0]
+            lines.pop(0)
+            if line.startswith("--BEGIN-FORMAT:"):
+                formatter = line.split(':')[1]
+                e = "--END-FORMAT:" + formatter
+                f = ""
+                while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
+                if formatter == 'FormatMathJax':
+                    self.maybe_send('text/latex', f)
+                else:
+                    self.maybe_send_to_stdout(f)
 
 command_list="""
 AND  Aleph  An   And  B1solve  BY  BasicMethod  Beta  BumInSepFFE   Chi  Ci  D  Delta
