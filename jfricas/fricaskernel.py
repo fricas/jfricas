@@ -311,6 +311,15 @@ class SPAD(Kernel):
     def handle_fricas_result(self):
         out = self.server.output
 
+        step = int(out['step'])
+        self.send_response(self.iopub_socket, 'execute_result',
+            {'execution_count': step,
+             'data': {'text/plain': 'rhx'},
+             'metadata': {}})
+
+        self.maybe_send_to_stdout( '--[[' + out['step']   + ']]--')
+
+
         # Error handling (red)
         if out['stderr'] != "":
             self.send_response(self.iopub_socket, 'stream',
@@ -319,6 +328,10 @@ class SPAD(Kernel):
         self.maybe_send_to_stdout( '--[[' + out['step']   + ']]--')
         self.maybe_send_to_stdout('--[[' + out['error?'] + ']]--')
 
+        # TODO: Error can also occur during conversion of OutputForm
+        # to the respective format. Then it is not so clear where the
+        # error message actually appears.
+        # It's possibly in the last non-empty stream
         if out['error?'] == 'T':
             self.send_response(self.iopub_socket, 'stream',
                 {'name': 'stderr', 'text': 'ERROR\n' + out['algebra']})
