@@ -296,6 +296,67 @@ class SPAD(Kernel):
     # Auxiliary functions
     ###################################################################
 
+    def addLinks(self, s):
+        """Every word of the form Aaaa is replaced by
+        "<a href=\"" + api + Aaaa + ".html\">"+Aaaa+"</a>".
+        """
+        import re
+        api = r'https://fricas.github.io/api/'
+        con = r'([A-Z][A-Za-z0-9]*)'
+        repl = r'<a href="'+api+r'\1.html" target="_blank" style="color:blue;text-decoration:none;">\1</a>'
+        return re.sub(con, repl, s)
+
+    def splitAlgebraTypeTime(self, s):
+        # $algebraOutputStream (even when ')set output algebra off')
+        # contains type and time information (when ')set message type on'
+        # or ')set message time on'. With the settings in webspad, we
+        # simply can extract (and delete) the date between the lines
+        # --BEGIN-TYPE
+        # fricas type
+        # --END-TIME
+        # --BEGIN-TYPE
+        # fricas time
+        # --END-TIME
+        # Note that there might be spaces on the left of the line.
+        # These lines appear (if at all) after the actual algebra output.
+        # The input is supposed to be server.output['algebra']
+        lines = s.split('\n')
+        ti = ''
+        ty = ''
+        al = ''
+        inType = 0
+        inTime = 0
+        for line in lines:
+            li = line.lstrip()
+            if inType > 0:
+                if li == '--END-TYPE':
+                    ty += '</p>\n'
+                    inType = 0
+                elif li:
+                    if inType == 1: ty += '<p style="text-align:right;">'
+                    ty += li
+                    inType += 1
+            elif inTime > 0:
+                if li == '--END-TIME':
+                    ti += '</p>\n'
+                    inTime = 0
+                elif li:
+                    if inTime == 1: ti += '<p style="text-align:right;">'
+                    ti += li
+                    inTime += 1
+            elif li == '--BEGIN-TYPE':
+                inType = 1
+            elif li == '--BEGIN-TIME':
+                inTime = 1
+            else:
+                al = al + line + '\n'
+        if ty:
+            ty = self.addLinks(ty)
+            ty = '<div style="text-align:right;">' + ty + '</div>'
+
+        return (al, ty, ti) # algebra part, type, and time.
+
+
     def maybe_send_to_stdout(self, s):
         if s:
             self.send_response(self.iopub_socket, 'stream',
@@ -312,35 +373,39 @@ class SPAD(Kernel):
         out = self.server.output
 
         step = int(out['step'])
+
         self.send_response(self.iopub_socket, 'execute_result',
             {'execution_count': step,
-             'data': {'text/plain': 'rhx'},
+             'data': {'text/plain': '[[' + out['step'] + out['error?'] + ']]'},
              'metadata': {}})
-
-        self.maybe_send_to_stdout( '--[[' + out['step']   + ']]--')
-
 
         # Error handling (red)
         if out['stderr'] != "":
             self.send_response(self.iopub_socket, 'stream',
                 {'name': 'stderr', 'text': out['stderr']})
 
-        self.maybe_send_to_stdout( '--[[' + out['step']   + ']]--')
-        self.maybe_send_to_stdout('--[[' + out['error?'] + ']]--')
+        (al, ty, ti) = self.splitAlgebraTypeTime(out['algebra'])
 
         # TODO: Error can also occur during conversion of OutputForm
         # to the respective format. Then it is not so clear where the
         # error message actually appears.
-        # It's possibly in the last non-empty stream
+        # It's possibly in the last non-empty stream where 'last'
+        # is taken as in i-output.boot.
+        # We send that output as text string to stderr.
         if out['error?'] == 'T':
-            self.send_response(self.iopub_socket, 'stream',
-                {'name': 'stderr', 'text': 'ERROR\n' + out['algebra']})
-            out['algebra'] = ''
+            order = ['stdout', 'formatted', 'html', 'texmacs',
+                     'mathml', 'tex', 'algebra', 'fortran']
+            for fmt in order:
+                if out[fmt].strip().strip('\n'):
+                    self.send_response(self.iopub_socket, 'stream',
+                        {'name': 'stderr', 'text': 'ERROR\n' + out[fmt]})
+                    out[fmt] = ''
+                    break
 
         self.maybe_send_to_stdout(out['stdout'])
 
         # Possibly contains the type and time
-        self.maybe_send_to_stdout(out['algebra'])
+        self.maybe_send_to_stdout(al)
 
         if out['tex']:
             r = out['tex'].strip().strip('$$')
@@ -356,21 +421,24 @@ class SPAD(Kernel):
         self.maybe_send_to_stdout(out['fortran'])
         self.maybe_send_to_stdout(out['openmath'])
 
-        if not out['formatted']: return
+        if out['formatted']:
 
-        lines = out['formatted'].split('\n')
-        while lines:
-            line = lines[0]
-            lines.pop(0)
-            if line.startswith("--BEGIN-FORMAT:"):
-                formatter = line.split(':')[1]
-                e = "--END-FORMAT:" + formatter
-                f = ""
-                while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
-                if formatter == 'FormatMathJax':
-                    self.maybe_send('text/latex', f)
-                else:
-                    self.maybe_send_to_stdout(f)
+            lines = out['formatted'].split('\n')
+            while lines:
+                line = lines[0]
+                lines.pop(0)
+                if line.startswith("--BEGIN-FORMAT:"):
+                    formatter = line.split(':')[1]
+                    e = "--END-FORMAT:" + formatter
+                    f = ""
+                    while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
+                    if formatter == 'FormatMathJax':
+                        self.maybe_send('text/latex', f)
+                    else:
+                        self.maybe_send_to_stdout(f)
+
+        self.maybe_send('text/html', ty + ti) # type and time
+
 
 command_list="""
 AND  Aleph  An   And  B1solve  BY  BasicMethod  Beta  BumInSepFFE   Chi  Ci  D  Delta
