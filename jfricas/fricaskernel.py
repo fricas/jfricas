@@ -306,55 +306,102 @@ class SPAD(Kernel):
         repl = r'<a href="'+api+r'\1.html" target="_blank" style="color:blue;text-decoration:none;">\1</a>'
         return re.sub(con, repl, s)
 
-    def splitAlgebraTypeTime(self, s):
-        # $algebraOutputStream (even when ')set output algebra off')
-        # contains type and time information (when ')set message type on'
-        # or ')set message time on'. With the settings in webspad, we
-        # simply can extract (and delete) the date between the lines
-        # --BEGIN-TYPE
-        # fricas type
-        # --END-TIME
-        # --BEGIN-TYPE
-        # fricas time
-        # --END-TIME
-        # Note that there might be spaces on the left of the line.
-        # These lines appear (if at all) after the actual algebra output.
-        # The input is supposed to be server.output['algebra']
+    # Since we set $printStorageIfTrue, we will get a line that looks like
+    # --FORMAT:END:Storage:n
+    # where n is the step number that will be used for Out[n] in Jupyter.
+    # We return a list of strings that correspond to the respective inputs.
+    # The last line in each array entry is a line of the form above.
+    def splitOutput(self, s):
+        result = []
+        ex_out = []
         lines = s.split('\n')
-        ti = ''
-        ty = ''
-        al = ''
-        inType = 0
-        inTime = 0
-        for line in lines:
-            li = line.lstrip()
-            if inType > 0:
-                if li == '--END-TYPE':
-                    ty += '</p>\n'
-                    inType = 0
-                elif li:
-                    if inType == 1: ty += '<p style="text-align:right;">'
-                    ty += li
-                    inType += 1
-            elif inTime > 0:
-                if li == '--END-TIME':
-                    ti += '</p>\n'
-                    inTime = 0
-                elif li:
-                    if inTime == 1: ti += '<p style="text-align:right;">'
-                    ti += li
-                    inTime += 1
-            elif li == '--BEGIN-TYPE':
-                inType = 1
-            elif li == '--BEGIN-TIME':
-                inTime = 1
-            else:
-                al = al + line + '\n'
-        if ty:
-            ty = self.addLinks(ty)
-            ty = '<div style="text-align:right;">' + ty + '</div>'
+        n = len(lines)
+        i = 0
+        outputs = []
+        while i < n:
+            fmt = []
+            line = lines[i]
+            i += 1
+            if line == '': continue
 
-        return (al, ty, ti) # algebra part, type, and time.
+            if line.startswith('--FORMAT:BEG:'):
+                y = line[13:]
+                p = y.find(':')
+                if p < 0:
+                    f = y
+                else:
+                    f = y[:p]
+                    step = int(y[p+1:])
+                e = '--FORMAT:END:' + y
+            elif line == '$$':
+                f = 'tex'
+                fmt = [pretex, line]
+                e = '$$'
+            elif line.startswith('<math xmlns='):
+                f = 'mathml'
+                e = '</math>'
+            elif line.startswith('scheme: '):
+                f = 'texmacs'
+                fmt = [line]
+                e = ')'
+            else:
+                fmt = ['UNKNOWN(' + line + ')']
+                outputs.append({'format': 'unknown', 'lines': fmt})
+                raise Exception('UnKnown {0} nwonKnU'.format(outputs))
+
+            while i < n:
+                li = lines[i]
+                i += 1
+                if li == e:
+                    if not e.startswith('--FORMAT:END:'): fmt.append(e)
+                    break
+                else:
+                    fmt.append(li)
+
+            if f == 'Storage':
+                # end of output series
+                ex_out.append({'step': step, 'outputs': outputs})
+                outputs = []
+            else:
+                outputs.append({'format': f, 'lines': fmt})
+
+        for eo in ex_out:
+            step = eo['step']
+            for o in eo['outputs']:
+                f = o['format']
+                lines = o['lines']
+                content_type = 'text/plain' # default
+                if f == 'tex':
+                    content_type = 'text/latex'
+                elif f == 'mathml':
+                    content_type = 'text/html'
+                elif  f == 'FormatMathJax':
+                    content_type = 'text/latex'
+                elif f == 'TypeTime':
+                    p = lines[0].find('Type: ')
+                    ty = self.addLinks(lines[0][p+6:])
+                    ty = '<p style="text-align:right;">' + ty + '</p>'
+                    p = lines[1].find('Time: ')
+                    ti = lines[1][p:]
+                    ti = '<p style="text-align:right;">' + ti + '</p>'
+                    lines = [ty, ti]
+                    content_type = 'text/html'
+                elif f == 'Type':
+                    p = lines[0].find('Type: ')
+                    ty = self.addLinks(lines[0][p+6:])
+                    ty = '<p style="text-align:right;">' + ty + '</p>'
+                    content_type = 'text/html'
+                elif f == 'Time':
+                    p = lines[0].find('Time: ')
+                    ti = lines[0][p:]
+                    ty = '<p style="text-align:right;">' + ti + '</p>'
+                    lines = [ty, ti]
+                    content_type = 'text/html'
+
+                result.append({'execution_count': step,
+                               'data': {content_type: '\n'.join(lines)},
+                               'metadata': {}})
+        return result
 
 
     def maybe_send_to_stdout(self, s):
@@ -370,74 +417,9 @@ class SPAD(Kernel):
 
 
     def handle_fricas_result(self):
-        out = self.server.output
-
-        step = int(out['step'])
-
-        self.send_response(self.iopub_socket, 'execute_result',
-            {'execution_count': step,
-             'data': {'text/plain': '[[' + out['step'] + out['error?'] + ']]'},
-             'metadata': {}})
-
-        # Error handling (red)
-        if out['stderr'] != "":
-            self.send_response(self.iopub_socket, 'stream',
-                {'name': 'stderr', 'text': out['stderr']})
-
-        (al, ty, ti) = self.splitAlgebraTypeTime(out['algebra'])
-
-        # TODO: Error can also occur during conversion of OutputForm
-        # to the respective format. Then it is not so clear where the
-        # error message actually appears.
-        # It's possibly in the last non-empty stream where 'last'
-        # is taken as in i-output.boot.
-        # We send that output as text string to stderr.
-        if out['error?'] == 'T':
-            order = ['stdout', 'formatted', 'html', 'texmacs',
-                     'mathml', 'tex', 'algebra', 'fortran']
-            for fmt in order:
-                if out[fmt].strip().strip('\n'):
-                    self.send_response(self.iopub_socket, 'stream',
-                        {'name': 'stderr', 'text': 'ERROR\n' + out[fmt]})
-                    out[fmt] = ''
-                    break
-
-        self.maybe_send_to_stdout(out['stdout'])
-
-        # Possibly contains the type and time
-        self.maybe_send_to_stdout(al)
-
-        if out['tex']:
-            r = out['tex'].strip().strip('$$')
-            r = texout.format(tex_color, tex_size, r)
-            fmt = pretex + ljax + r + rjax
-            self.maybe_send('text/latex', fmt)
-
-        self.maybe_send('text/html', out['html'])
-        self.maybe_send('text/html', out['mathml'])
-
-        self.maybe_send_to_stdout(out['fortran'])
-        self.maybe_send_to_stdout(out['texmacs'])
-        self.maybe_send_to_stdout(out['fortran'])
-        self.maybe_send_to_stdout(out['openmath'])
-
-        if out['formatted']:
-
-            lines = out['formatted'].split('\n')
-            while lines:
-                line = lines[0]
-                lines.pop(0)
-                if line.startswith("--BEGIN-FORMAT:"):
-                    formatter = line.split(':')[1]
-                    e = "--END-FORMAT:" + formatter
-                    f = ""
-                    while lines and lines[0] != e: f = f + lines.pop(0) + '\n'
-                    if formatter == 'FormatMathJax':
-                        self.maybe_send('text/latex', f)
-                    else:
-                        self.maybe_send_to_stdout(f)
-
-        self.maybe_send('text/html', ty + ti) # type and time
+        outputs = self.splitOutput(self.server.output['stdout'])
+        for o in outputs:
+            self.send_response(self.iopub_socket, 'execute_result', o)
 
 
 command_list="""
@@ -1264,12 +1246,13 @@ spad_commands = command_list.split()
 if __name__ == '__main__':
     from ipykernel.kernelapp import IPKernelApp
     path=os.path.dirname(os.path.abspath(__file__))
-    req_asdf='(require :asdf)'
-    req_ht='(require :hunchentoot)'
-    ld_webspad='(load "{0}/webspad")'.format(path)
-    start='(defvar webspad::fricas-acceptor (webspad::start {0} "localhost"))'.format(htport)
-    ev1=')lisp (progn {0} {1} {2})'.format(req_asdf,req_ht,ld_webspad)
-    ev2=')lisp {0}'.format(start)
-    fopts = fricas_start_options
-    pid = Popen(fricas_terminal + ['fricas','-eval',ev1,'-eval',ev2,fopts])
+
+    prereq = ')lisp (load "{0}/webspad")'.format(path)
+
+    start  = ')lisp (defvar webspad::fricas-acceptor '
+    start += '(webspad::start {0} "localhost"))'.format(htport)
+
+
+#    pid = Popen(fricas_terminal + ['fricas',
+    pid = Popen(['fricas','-eval',prereq,'-eval',start,fricas_start_options])
     IPKernelApp.launch_instance(kernel_class=SPAD)
