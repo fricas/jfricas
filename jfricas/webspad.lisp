@@ -36,6 +36,9 @@
   (setf |$printTypeIfTrue| T) ; Make sure we get "Type:" line.
   (setf |$printTimeIfTrue| T) ; Make sure we get "Time:" line.
   (setf |$printStorageIfTrue| T) ; Make sure we get "Storage:" line.
+  (setf |$fortranFormat| NIL) ; we don't want Fortran output
+  (setf |$htmlFormat| NIL) ; we don't want Html output
+  (setf |$openMathFormat| NIL) ; we don't want OpenMath output
   (eq (catch 'SPAD_READER (catch '|top_level| (boot::|parseAndEvalStr| code)))
       '|restart|))
 
@@ -53,17 +56,8 @@
 
 (in-package :webspad)
 
-; Get result and sent back the stream to its original.
-(defmacro gr (v s saved)
-  `(progn
-    (setf ,v (get-output-stream-string ,s))
-    (setf ,s ,saved)))
-
 (defstruct r
   (stdout    "" :type string)
-  (fortran   "" :type string)
-  (html      "" :type string)
-  (openmath  "" :type string)
   (error?    "" :type string)
   (input     "" :type string))
 
@@ -85,9 +79,6 @@
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
          (s-texmacs   boot::|$texmacsOutputStream|)
-         (s-fortran   boot::|$fortranOutputStream|)
-         (s-html      boot::|$htmlOutputStream|)
-         (s-openmath  boot::|$openMathOutputStream|)
 
          ; Check for multiline input and create a temporary file for it.
          (code (if (> (count #\newline input) 0)
@@ -111,20 +102,12 @@
     (setf boot::|$mathmlOutputStream|    boot::*standard-output*)
     (setf boot::|$formattedOutputStream| boot::*standard-output*)
     (setf boot::|$texmacsOutputStream|   boot::*standard-output*)
-    ; The following stream have no begin/end markers
-    (setf boot::|$htmlOutputStream|      (make-string-output-stream))
-    (setf boot::|$fortranOutputStream|   (make-string-output-stream))
-    (setf boot::|$openMathOutputStream|  (make-string-output-stream))
 
     ; eval and return true if there was an error
     (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| code) "T" "F"))
 
-    ; extract the output from the streams and reset stream
-    (gr (r-stdout    data) boot::*standard-output*        s-stdout)
-    (gr (r-fortran   data) boot::|$fortranOutputStream|   s-fortran)
-    (gr (r-html      data) boot::|$htmlOutputStream|      s-html)
-    (gr (r-openmath  data) boot::|$openMathOutputStream|  s-openmath)
-
+    (setf (r-stdout    data) (get-output-stream-string boot::*standard-output*))
+    (setf boot::*standard-output*        s-stdout)
     (setf boot::*error-output*           s-stderr)
     (setf boot::|$algebraOutputStream|   s-algebra)
     (setf boot::|$formattedOutputStream| s-formatted)
@@ -143,16 +126,10 @@
 
 (defun encode-json (data)
   (format nil "{ \"stdout\":~S,~
-                 \"fortran\":~S,~
-                 \"html\":~S,~
-                 \"openmath\":~S,~
                  \"error?\":~S,~
                  \"input\":~S~
                }"
           (r-stdout data)
-          (r-fortran data)
-          (r-html data)
-          (r-openmath data)
           (r-error? data)
           (r-input data)))
 
