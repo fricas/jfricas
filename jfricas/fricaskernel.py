@@ -74,30 +74,11 @@ shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
 shell_result_fricas = '__system_result:="{0}"' # store sh result in Fricas
 
-# LaTeX color/size parameters
-type_color = r"blue"
-type_size = r"\scriptsize"
-tex_color = r"black"
-tex_size = r"\normalsize"
-
 # Templates (TeX)
-pretex1 = r"\(\def\sp{^}\def\sb{_}\def\leqno(#1){}\)"
-pretex2 = r"\(\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}\)"
-pretex3 = r"\(\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}\)"
-pretex4 = r"\(\require{color}\)"
-pretex = pretex1+pretex2+pretex3+pretex4
-ljax = r"$$"  # variants: r"\("
-rjax = r"$$"  #           r"\)"
-
-# texout_types.format(tex_color,tex_size,tex,type_color,type_size,type)
-texout_types = r"""
-{{\color{{{0}}} {1} {2}}} \\[0.9ex] {{\color{{{3}}} {4} \text{{{5}}}}} \\
-"""
-
-# texout.format(tex_color,tex_size,tex)
-texout = r"""
-{{\color{{{0}}} {1} {2}}}
-"""
+pretex1 = r"\def\sp{^}\def\sb{_}\def\leqno(#1){}"
+pretex2 = r"\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}"
+pretex3 = r"\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}"
+pretex = pretex1+pretex2+pretex3
 
 # gnuplot javascript files location
 gpjsf = '/static/gpjs'
@@ -236,8 +217,9 @@ class SPAD(Kernel):
 
         # send code to hunchentoot and get response from FriCAS
         r = self.server.put(code)
-        self.send_response(self.iopub_socket, 'stream',
-                           {'name': 'stdout', 'text': str(r.text)})
+        # Uncomment the follwing for debugging purposes.
+        ##self.send_response(self.iopub_socket, 'stream',
+        ##                  {'name': 'stdout', 'text': str(r.text)})
 
         if r.ok and not silent: self.handle_fricas_result()
         return ok_status
@@ -303,26 +285,36 @@ class SPAD(Kernel):
         import re
         api = r'https://fricas.github.io/api/'
         con = r'([A-Z][A-Za-z0-9]*)'
-        repl = r'<a href="'+api+r'\1.html" target="_blank" style="color:blue;text-decoration:none;">\1</a>'
+        sty = 'style="color:blue;text-decoration:none;"'
+        repl = r'<a href="'+api+r'\1.html" target="_blank" '+sty+r'>\1</a>'
         return re.sub(con, repl, s)
+
+    def formatTypeTime(self, lines):
+        return '<div style="text-align:right;">'+'<br />'.join(lines)+'</div>\n'
 
     # Since we set $printStorageIfTrue, we will get a line that looks like
     # --FORMAT:END:Storage:n
     # where n is the step number that will be used for Out[n] in Jupyter.
-    # We return a list of strings that correspond to the respective inputs.
-    # The last line in each array entry is a line of the form above.
-    def splitOutput(self, s):
-        result = []
-        ex_out = []
+    # We return a list of output records of the form
+    #   {'step': step, 'outputs': outputs}
+    # where outputs is a list with entries of the form
+    #   {content_type: content}.
+    def split_output(self, s):
+        stepped_outputs = [] # intermediate collection of data
         lines = s.split('\n')
         n = len(lines)
         i = 0
         outputs = []
         while i < n:
-            fmt = []
+            content_type = 'text/plain' # default
             line = lines[i]
+            content = line # initialize
             i += 1
             if line == '': continue
+
+            # In the following we misuse the content_type field
+            # with the value 'ERROR' to signal that the output should be
+            # send as text to stderr.
 
             if line.startswith('--FORMAT:BEG:'):
                 y = line[13:]
@@ -332,94 +324,101 @@ class SPAD(Kernel):
                 else:
                     f = y[:p]
                     step = int(y[p+1:])
-                e = '--FORMAT:END:' + y
-            elif line == '$$':
-                f = 'tex'
-                fmt = [pretex, line]
-                e = '$$'
-            elif line.startswith('<math xmlns='):
-                f = 'mathml'
-                e = '</math>'
-            elif line.startswith('scheme: '):
-                f = 'texmacs'
-                fmt = [line]
-                e = ')'
-            else:
-                fmt = ['UNKNOWN(' + line + ')']
-                outputs.append({'format': 'unknown', 'lines': fmt})
-                raise Exception('UnKnown {0} nwonKnU'.format(outputs))
+                content = '' # delete '--FORMAT:BEG:'-line
+                end_marker = '--FORMAT:END:' + y
+                if f == 'FormatMathJax':
+                    content_type = 'text/latex'
+                elif f == 'TypeTime' or f == 'Type' or f == 'Time':
+                    line = lines[i]
+                    i += 1
+                    if f == 'TypeTime':
+                        p = line.find('Type: ')
+                        ty = self.addLinks(line[p+6:])
+                        p = lines[i].find('Time: ')
+                        content = [ty, lines[i][p:]] # type and time
+                        i += 1 # we have two lines to consider
+                    elif f == 'Type':
+                        p = line.find('Type: ')
+                        content = [self.addLinks(lines[0][p+6:])] # type
+                    elif f == 'Time':
+                        p = line.find('Time: ')
+                        content = [line[p:]] # time
+                    i += 1 # step over end marker
+                    outputs.append({'text/html': self.formatTypeTime(content)})
+                    continue
+                elif f == 'ERROR':
+                    conten_type = 'ERROR'
 
+            elif line == '$$': # Corresponds to TexFormat
+                content_type = 'text/latex'
+                content += pretex + '\n'
+                end_marker = '$$'
+            elif line.startswith('<math xmlns='): # Corresponds to MathMLFormat
+                content_type = 'text/html'
+                end_marker = '</math>'
+            elif line.startswith('scheme: '):  # Corresponds to TexmacsFormat
+                end_marker = ')'
+            else:
+                outputs.append({'ERROR': line + '\n'})
+                continue
+
+            # Collect the lines into content until the end_marker is found
             while i < n:
-                li = lines[i]
+                line = lines[i]
                 i += 1
-                if li == e:
-                    if not e.startswith('--FORMAT:END:'): fmt.append(e)
+                if line == end_marker:
+                    if not end_marker.startswith('--FORMAT:END:'):
+                        content += end_marker + '\n'
                     break
                 else:
-                    fmt.append(li)
+                    content += line + '\n'
 
             if f == 'Storage':
                 # end of output series
-                ex_out.append({'step': step, 'outputs': outputs})
+                stepped_outputs.append({'step': step, 'outputs': outputs})
                 outputs = []
             else:
-                outputs.append({'format': f, 'lines': fmt})
+                outputs.append({content_type: content})
+        if outputs:
+            stepped_outputs.append({'step': -1, 'outputs': outputs})
 
-        for eo in ex_out:
-            step = eo['step']
-            for o in eo['outputs']:
-                f = o['format']
-                lines = o['lines']
-                content_type = 'text/plain' # default
-                if f == 'tex':
-                    content_type = 'text/latex'
-                elif f == 'mathml':
-                    content_type = 'text/html'
-                elif  f == 'FormatMathJax':
-                    content_type = 'text/latex'
-                elif f == 'TypeTime':
-                    p = lines[0].find('Type: ')
-                    ty = self.addLinks(lines[0][p+6:])
-                    ty = '<p style="text-align:right;">' + ty + '</p>'
-                    p = lines[1].find('Time: ')
-                    ti = lines[1][p:]
-                    ti = '<p style="text-align:right;">' + ti + '</p>'
-                    lines = [ty, ti]
-                    content_type = 'text/html'
-                elif f == 'Type':
-                    p = lines[0].find('Type: ')
-                    ty = self.addLinks(lines[0][p+6:])
-                    ty = '<p style="text-align:right;">' + ty + '</p>'
-                    content_type = 'text/html'
-                elif f == 'Time':
-                    p = lines[0].find('Time: ')
-                    ti = lines[0][p:]
-                    ty = '<p style="text-align:right;">' + ti + '</p>'
-                    lines = [ty, ti]
-                    content_type = 'text/html'
+        return stepped_outputs
 
-                result.append({'execution_count': step,
-                               'data': {content_type: '\n'.join(lines)},
-                               'metadata': {}})
-        return result
-
-
-    def maybe_send_to_stdout(self, s):
-        if s:
-            self.send_response(self.iopub_socket, 'stream',
-                               {'name': 'stdout', 'text': s})
-
-
-    def maybe_send(self, content_type, s):
-        if s:
-            self.send_response(self.iopub_socket, 'display_data',
-                               {'data': {content_type: s}, 'metadata': {}})
 
 
     def handle_fricas_result(self):
-        outputs = self.splitOutput(self.server.output['stdout'])
-        for o in outputs:
-            self.send_response(self.iopub_socket, 'execute_result', o)
+        # See webspad.list for the structure of out.
+        # If an error occured, simply put every output to stderr.
+        out = self.server.output
+        stepped_outputs = self.split_output(out['stdout'])
+        if out['error?'] == 'T':
+            for so in stepped_outputs:
+                for data in so['outputs']:
+                    for k in data.keys():
+                        self.send_response(self.iopub_socket, 'stream',
+                            {'name': 'stderr', 'text': data[k]})
+        else:
+            for so in stepped_outputs:
+                if not so['outputs']: continue
+                data = so['outputs'][0]
+                for k in data.keys():
+                    if k == 'ERROR':
+                        self.send_response(self.iopub_socket, 'stream',
+                            {'name': 'stderr', 'text': data[k]})
+                    else:
+                        self.send_response(self.iopub_socket, 'execute_result',
+                                           {'execution_count': so['step'],
+                                            'data': data,
+                                           'metadata': {}})
+                # Now print the remaining output
+                for data in so['outputs'][1:]:
+                    for k in data.keys():
+                        if k == 'ERROR':
+                            self.send_response(self.iopub_socket, 'stream',
+                                {'name': 'stderr', 'text': data[k]})
+                        else:
+                            self.send_response(self.iopub_socket,'display_data',
+                                {'data': data, 'metadata': {}})
 
 
 command_list="""
