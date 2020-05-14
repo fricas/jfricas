@@ -1,47 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Reference:
-# http://jupyter-client.readthedocs.io/en/stable/wrapperkernels.html
-
-# Revision history
-# 17-JUL-2019 ........ python3: replace <> by !=
-# 21-JUL-2019 ........ banner = "FriCAS Jupyter Kernel" /removed Axiom, SPAD
-#             ........ reformatting spadcmd using par 85j.
-# 23-JUL-2019 ........ Added global pid (process id of fricas+HT)
-#             ........ do_shutdown: self.server.put(")quit")
-#                      pid.terminate() # terminate fricas+HT
-# 30-JUL-2019 ........ restart=False in do_shutdown
-#             ........ Language: spad (removed SPAD).
-# 08-AUG-2019 ........ Added terminal feature: ['term','-?']+['fricas',...]
-#                      Added: user config section
-#                      Added: subprocess.run (! prefix for shell commands)
-#                      Removed: import imp --deprecated since 3.4
-#                      Tidy up.
-# 13-AUG-2019 ........ V 0.2.10
-#                      +html_prefix in algebra output (type=String)
-# 14-AUG-2019 ........ V 0.2.11
-#                      +shell_result (store last sh result in python)
-#                      +shell_result_fricas (store sh result in Fricas)
-#                      +spadtype=String check for html_prefix in alg mode
-#                      :pip3 install .
-# 15-AUG-2019 ........ V 0.2.12
-#                      +gnuplot canvas
-# 16-AUG-2019 ........ V 0.2.13
-#                      +do_inspect (code inspection / SHIFT-TAB
-#                      key exception resolved (status/ret def msg)
-# 17-AUG-2019 ........ New: https://docs.python.org/3/library/pathlib.html
-#                      requires min Python 3.4 (needed to find gnuplot path)
-#                      -- wasn't a good idea -- rolled back
-# 18-AUG-2019 ........ V 0.2.15
-#                      Serving js from https://nilqed.github.io/jfricas.pip/js/
-# 19-AUG-2019 ........ V 0.2.16
-#                      serving from /static
-# 14-SEP-2019 ........ V 0.2.17
-#                      define python variables: static_file_path, kernel_file_path
-#                      (temporary solution -- gonna try /static/... later)
-#
-#
-
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
 import requests
@@ -67,8 +25,8 @@ shutd = ')shutdown'
 gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
-#fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
-fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
+fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
+#fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
 
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
@@ -1298,6 +1256,6 @@ if __name__ == '__main__':
     start += '(webspad::start {0} "localhost"))'.format(htport)
 
 
-#    pid = Popen(fricas_terminal + ['fricas',
-    pid = Popen(['fricas','-eval',prereq,'-eval',start,fricas_start_options])
+    pid = Popen(fricas_terminal +
+                ['fricas','-eval',prereq,'-eval',start,fricas_start_options])
     IPKernelApp.launch_instance(kernel_class=SPAD)

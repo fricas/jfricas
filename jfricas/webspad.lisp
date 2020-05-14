@@ -163,22 +163,6 @@
   (format nil "~A~%" (encode-json (webspad-eval code))))
 
 
-;;;(hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port +port+))
-
-;;; add :address "localhost"  if you wish local access only
-
-;(defvar fricas-default-acceptor)
-;(setf fricas-default-acceptor (make-instance 'hunchentoot:easy-acceptor :port +port+))
-;(hunchentoot:start fricas-default-acceptor)
-
-;;; Get the port in Fricas
-;;; )lisp (hunchentoot::acceptor-port webspad::fricas-default-acceptor)
-
-
 (defun start (port address)
   (hunchentoot:start
     (make-instance 'hunchentoot:easy-acceptor :port port :address address)))
-
- ; usage:
-; )lisp (defvar webspad::fricas-acceptor (webspad::start 4242 "localhost"))
-; )lisp (hunchentoot::acceptor-port webspad::fricas-acceptor)
