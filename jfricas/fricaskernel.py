@@ -216,12 +216,53 @@ class SPAD(Kernel):
             return ok_status
 
         # send code to hunchentoot and get response from FriCAS
-        r = self.server.put(code)
-        # Uncomment the follwing for debugging purposes.
-        ##self.send_response(self.iopub_socket, 'stream',
-        ##                  {'name': 'stdout', 'text': str(r.text)})
 
-        if r.ok and not silent: self.handle_fricas_result()
+        # It would be enough to send just the whole code string,
+        # because webspad takes care if the code consists of several
+        # lines. However, if, for example, the input cell contains the
+        # following code lines.
+        #   2+3
+        #   [1,]
+        #   4+5
+        # and we send this to FriCAS as one block, then the evaluation
+        # stops at the second line and returns an error and output
+        # that contains a good evaluation of the first line and a
+        # error output for the second line.
+        # Unfortunately, all the output comes in one chunk and it is
+        # hard to detect what the actuall error message is.
+        # Therefore, we split the input into separate input blocks by the
+        # following rules
+        # (a) All whitespace is remove from the end of a line.
+        # (b) A line ending in _ (underscore) makes the next line
+        #     belonging to the same block.
+        # (c) A line starting with a non-whitespace character begins
+        #     a new input block.
+        # (d) All lines that begin with a space character are associated
+        #     with the current block.
+        # Then we handle one block afte the other.
+        lines = code.split('\n')
+        blocks = []
+        block = ""
+        for line in lines:
+            line = line.rstrip()
+            if not block:
+                block = line
+                continue
+            l = len(block) # assert(l>0)
+            if block[l-1] == '_' or (line and line[0] == ' '):
+                block += '\n' + line
+            elif block: # The new line begins with non-whitespace
+                blocks.append(block)
+                block = line
+        if block: blocks.append(block)
+
+        for block in blocks:
+            r = self.server.put(block)
+            # Uncomment the follwing for debugging purposes.
+##            self.send_response(self.iopub_socket, 'stream',
+##                              {'name': 'stdout', 'text': str(r.text)})
+            if r.ok and not silent: self.handle_fricas_result()
+
         return ok_status
 
 
@@ -305,12 +346,13 @@ class SPAD(Kernel):
         n = len(lines)
         i = 0
         outputs = []
+        step = 0
         while i < n:
             content_type = 'text/plain' # default
             line = lines[i]
             content = line # initialize
             i += 1
-            if line == '': continue
+            if line.strip() == '': continue
 
             # In the following we misuse the content_type field
             # with the value 'ERROR' to signal that the output should be
@@ -346,8 +388,8 @@ class SPAD(Kernel):
                     i += 1 # step over end marker
                     outputs.append({'text/html': self.formatTypeTime(content)})
                     continue
-                elif f == 'ERROR':
-                    conten_type = 'ERROR'
+                elif f == 'ERROR' or f == 'KeyedMsg':
+                    content_type = 'ERROR'
 
             elif line == '$$': # Corresponds to TexFormat
                 content_type = 'text/latex'
@@ -380,7 +422,7 @@ class SPAD(Kernel):
             else:
                 outputs.append({content_type: content})
         if outputs:
-            stepped_outputs.append({'step': -1, 'outputs': outputs})
+            stepped_outputs.append({'step': step, 'outputs': outputs})
 
         return stepped_outputs
 
@@ -391,34 +433,38 @@ class SPAD(Kernel):
         # If an error occured, simply put every output to stderr.
         out = self.server.output
         stepped_outputs = self.split_output(out['stdout'])
+##        self.send_response(self.iopub_socket, 'stream',
+##                           {'name': 'stdout', 'text':
+##                            'SteppedOutput: {0}'.format(stepped_outputs)})
+
         if out['error?'] == 'T':
             for so in stepped_outputs:
                 for data in so['outputs']:
                     for k in data.keys():
                         self.send_response(self.iopub_socket, 'stream',
                             {'name': 'stderr', 'text': data[k]})
-        else:
-            for so in stepped_outputs:
-                if not so['outputs']: continue
-                data = so['outputs'][0]
+            return False # signal error
+
+        for so in stepped_outputs:
+            if not so['outputs']: continue
+            is_first = True
+            # Now print the remaining output
+            for data in so['outputs']:
                 for k in data.keys():
                     if k == 'ERROR':
                         self.send_response(self.iopub_socket, 'stream',
                             {'name': 'stderr', 'text': data[k]})
-                    else:
+                    elif is_first:
                         self.send_response(self.iopub_socket, 'execute_result',
-                                           {'execution_count': so['step'],
-                                            'data': data,
-                                           'metadata': {}})
-                # Now print the remaining output
-                for data in so['outputs'][1:]:
-                    for k in data.keys():
-                        if k == 'ERROR':
-                            self.send_response(self.iopub_socket, 'stream',
-                                {'name': 'stderr', 'text': data[k]})
-                        else:
-                            self.send_response(self.iopub_socket,'display_data',
-                                {'data': data, 'metadata': {}})
+                            {'execution_count': so['step'],
+                             'data': data,
+                             'metadata': {}})
+                        is_first = False
+                    else:
+                        self.send_response(self.iopub_socket,'display_data',
+                            {'data': data, 'metadata': {}})
+
+        return True
 
 
 command_list="""

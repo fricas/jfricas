@@ -11,7 +11,7 @@
         (cond
          ((eq x '|startAlgebraOutput|) (ws-fmt "BEG:Algebra"))
          ((eq x '|endOfAlgebraOutput|) (ws-fmt "END:Algebra"))
-         ((eq x '|startPatternMsg|)    (ws-fmt "BEG:EROOR"))
+         ((eq x '|startPatternMsg|)    (ws-fmt "BEG:ERROR"))
          ((eq x '|endPatternMsg|)      (ws-fmt "END:ERROR"))
          ((eq x '|startKeyedMsg|)
           (cond
@@ -33,12 +33,13 @@
 ; Following function calls FriCAS for evaluation of code and returns
 ; true if ther is an error and nil otherwise.
 (defun |webspad-parseAndEvalStr| (code)
-  (setf |$printTypeIfTrue| T) ; Make sure we get "Type:" line.
-  (setf |$printTimeIfTrue| T) ; Make sure we get "Time:" line.
+  (setf |$printTypeIfTrue| T)    ; Make sure we get "Type:" line.
+  (setf |$printTimeIfTrue| T)    ; Make sure we get "Time:" line.
   (setf |$printStorageIfTrue| T) ; Make sure we get "Storage:" line.
-  (setf |$fortranFormat| NIL) ; we don't want Fortran output
-  (setf |$htmlFormat| NIL) ; we don't want Html output
-  (setf |$openMathFormat| NIL) ; we don't want OpenMath output
+  (setf |$fortranFormat| NIL)    ; we don't want Fortran output
+  (setf |$htmlFormat| NIL)       ; we don't want Html output
+  (setf |$openMathFormat| NIL)   ; we don't want OpenMath output
+  (setf |$MARGIN| 0)             ; we don't want indentation
   (eq (catch 'SPAD_READER (catch '|top_level| (boot::|parseAndEvalStr| code)))
       '|restart|))
 
