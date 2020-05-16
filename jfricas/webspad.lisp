@@ -31,14 +31,16 @@
 
 ; interpret-block takes a code string that is interpreted as if it
 ; comes from a .input file.
-(DEFUN |interpret-block| (code)
-  (PROG (|$erMsgToss| |$EchoLines| |st|)
-    (DECLARE (SPECIAL |$erMsgToss| |$EchoLines|))
+(DEFUN |interpret-block| (|code|)
+  (PROG (|$ncMsgList| |$erMsgToss| |$lastPos| |$EchoLines| |st|)
+    (DECLARE (SPECIAL |$ncMsgList| |$erMsgToss| |$lastPos| |$EchoLines|))
     (RETURN
      (PROGN
       (SETQ |$EchoLines| NIL)
+      (SETQ |$lastPos| |$nopos|)
       (SETQ |$erMsgToss| NIL)
-      (SETQ |st| (MAKE-STRING-INPUT-STREAM code))
+      (SETQ |$ncMsgList| NIL)
+      (SETQ |st| (MAKE-STRING-INPUT-STREAM |code|))
       (|intloopInclude0| |st| '|webspad| 0)))))
 
 ; Following function calls FriCAS for evaluation of code and returns
