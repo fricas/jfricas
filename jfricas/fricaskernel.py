@@ -219,7 +219,14 @@ class SPAD(Kernel):
             # Uncomment the follwing for debugging purposes.
 ##            self.send_response(self.iopub_socket, 'stream',
 ##                              {'name': 'stdout', 'text': str(r.text)})
-            if r.ok and not silent: self.handle_fricas_result()
+
+            if r.ok and not silent:
+                if not self.handle_fricas_result(): # True=ok, False=error
+                    return {'status': 'error',
+                            'execution_count': self.execution_count,
+                            'payload': [],
+                            'user_expressions': {},
+                           }
 
         return ok_status
 
