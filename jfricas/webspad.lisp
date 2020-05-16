@@ -52,14 +52,9 @@
   (setf |$openMathFormat| NIL)   ; we don't want OpenMath output
   (setf |$MARGIN| 0)             ; we don't want indentation
 
-  (if (> (count #\newline code) 0)
-      ; multi-line code
-      (eq (catch 'SPAD_READER (catch '|top_level| (|interpret-block| code)))
-         '|restart|)
-      ; code is a single line
-      (eq (catch 'SPAD_READER (catch '|top_level|
-                                (boot::|parseAndEvalStr| code)))
-          '|restart|)))
+  ; code might consist of multiple lines (i.e. contain newline characters)
+  (eq (catch 'SPAD_READER (catch '|top_level| (|interpret-block| code)))
+      '|restart|))
 
 ;;; ---------------------------------------------------------------
 
