@@ -350,13 +350,16 @@ class SPAD(Kernel):
                     content_type = 'ERROR'
 
             elif line == '$$': # Corresponds to TexFormat
+                f = 'TexFormat'
                 content_type = 'text/latex'
                 content += pretex + '\n'
                 end_marker = '$$'
             elif line.startswith('<math xmlns='): # Corresponds to MathMLFormat
+                f = 'MathMLFormat'
                 content_type = 'text/html'
                 end_marker = '</math>'
             elif line.startswith('scheme: '):  # Corresponds to TexmacsFormat
+                f = 'TexmacsFormat'
                 end_marker = ')'
             else:
                 outputs.append({'ERROR': line + '\n'})
@@ -371,6 +374,14 @@ class SPAD(Kernel):
                         content += end_marker + '\n'
                     break
                 else:
+                    # From Algebra output we remove the step number output.
+                    # For that we simply remove 4 characters "()  " and
+                    # the length of the step number (which can be extracted
+                    # from the end_marker.
+                    if f == 'Algebra':
+                        import math
+                        m = int(math.floor(math.log10(step)))+5
+                        line = line[m:]
                     content += line + '\n'
 
             if f == 'Storage':
