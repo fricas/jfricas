@@ -29,6 +29,17 @@
            ('T                        (ws-fmt "END:KeyedMsg"))))
         )))
 
+; interpret-block takes a code string that is interpreted as if it
+; comes from a .input file.
+(DEFUN |interpret-block| (code)
+  (PROG (|$erMsgToss| |$EchoLines| |st|)
+    (DECLARE (SPECIAL |$erMsgToss| |$EchoLines|))
+    (RETURN
+     (PROGN
+      (SETQ |$EchoLines| NIL)
+      (SETQ |$erMsgToss| NIL)
+      (SETQ |st| (MAKE-STRING-INPUT-STREAM code))
+      (|intloopInclude0| |st| '|webspad| 0)))))
 
 ; Following function calls FriCAS for evaluation of code and returns
 ; true if ther is an error and nil otherwise.
@@ -40,9 +51,15 @@
   (setf |$htmlFormat| NIL)       ; we don't want Html output
   (setf |$openMathFormat| NIL)   ; we don't want OpenMath output
   (setf |$MARGIN| 0)             ; we don't want indentation
-  (eq (catch 'SPAD_READER (catch '|top_level| (boot::|parseAndEvalStr| code)))
-      '|restart|))
 
+  (if (> (count #\newline code) 0)
+      ; multi-line code
+      (eq (catch 'SPAD_READER (catch '|top_level| (|interpret-block| code)))
+         '|restart|)
+      ; code is a single line
+      (eq (catch 'SPAD_READER (catch '|top_level|
+                                (boot::|parseAndEvalStr| code)))
+          '|restart|)))
 
 ;;; ---------------------------------------------------------------
 
@@ -79,20 +96,7 @@
          (s-formatted boot::|$formattedOutputStream|)
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
-         (s-texmacs   boot::|$texmacsOutputStream|)
-
-         ; Check for multiline input and create a temporary file for it.
-         (code (if (> (count #\newline input) 0)
-                   ; Tempfile for multiline input -> )read
-                   (let* ((tmp (format nil ".tmp-ispad-~S.input"
-                                      (random 100000))))
-                     (with-open-file
-                      (stream tmp :direction :output :if-exists :supersede)
-                      (format stream input))
-                     (format nil ")read ~S )quiet )ifthere" tmp))
-                 input))
-
-        )
+         (s-texmacs   boot::|$texmacsOutputStream|))
 
     ; create empty streams
     (setf boot::*standard-output*        (make-string-output-stream))
@@ -105,9 +109,9 @@
     (setf boot::|$texmacsOutputStream|   boot::*standard-output*)
 
     ; eval and return true if there was an error
-    (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| code) "T" "F"))
+    (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| input) "T" "F"))
 
-    (setf (r-stdout    data) (get-output-stream-string boot::*standard-output*))
+    (setf (r-stdout data) (get-output-stream-string boot::*standard-output*))
     (setf boot::*standard-output*        s-stdout)
     (setf boot::*error-output*           s-stderr)
     (setf boot::|$algebraOutputStream|   s-algebra)
