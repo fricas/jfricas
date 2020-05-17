@@ -296,7 +296,9 @@ class SPAD(Kernel):
         return re.sub(con, repl, s)
 
     def formatTypeTime(self, lines):
-        return '<div style="text-align:right;">'+'<br />'.join(lines)+'</div>\n'
+        brs = '<br />'
+        fTT = '<div style="text-align:right;"><sub>{0}</sub></div>'
+        return fTT.format(brs.join(lines))
 
     # Since we set $printStorageIfTrue, we will get a line that looks like
     # --FORMAT:END:Storage:n
@@ -1267,12 +1269,9 @@ spad_commands = command_list.split()
 if __name__ == '__main__':
     from ipykernel.kernelapp import IPKernelApp
     path=os.path.dirname(os.path.abspath(__file__))
-
     prereq = ')lisp (load "{0}/webspad")'.format(path)
-
     start  = ')lisp (defvar webspad::fricas-acceptor '
     start += '(webspad::start {0} "localhost"))'.format(htport)
-
 
     pid = Popen(fricas_terminal +
                 ['fricas','-eval',prereq,'-eval',start,fricas_start_options])
