@@ -348,7 +348,7 @@ class SPAD(Kernel):
                         i += 1 # we have two lines to consider
                     elif f == 'Type':
                         p = line.find('Type: ')
-                        content = [self.addLinks(lines[0][p+6:])] # type
+                        content = [self.addLinks(line[p+6:])] # type
                     elif f == 'Time':
                         p = line.find('Time: ')
                         content = [line[p:]] # time
