@@ -20,7 +20,7 @@ __version__ = '0.2.17'
 # BEGIN user configuration options
 # ********************************
 pycmd = ')python'
-shcmd = '!'
+shcmd = ')!'
 shutd = ')shutdown'
 gplot = ')gnuplot'
 
