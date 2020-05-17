@@ -46,8 +46,8 @@
 ; Following function calls FriCAS for evaluation of code and returns
 ; true if ther is an error and nil otherwise.
 (defun |webspad-parseAndEvalStr| (code)
-  (setf |$printTypeIfTrue| T)    ; Make sure we get "Type:" line.
-  (setf |$printTimeIfTrue| T)    ; Make sure we get "Time:" line.
+;  (setf |$printTypeIfTrue| T)    ; Make sure we get "Type:" line.
+;  (setf |$printTimeIfTrue| T)    ; Make sure we get "Time:" line.
   (setf |$printStorageIfTrue| T) ; Make sure we get "Storage:" line.
   (setf |$fortranFormat| NIL)    ; we don't want Fortran output
   (setf |$htmlFormat| NIL)       ; we don't want Html output
