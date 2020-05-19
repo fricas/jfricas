@@ -113,7 +113,9 @@ class SPAD(Kernel):
     def __init__(self, **kwargs):
         Kernel.__init__(self, **kwargs)
         self.server = httpSPAD()
-        self.spadcmds = fricas_ids
+        self.fricas_operations = fricas_operations
+        self.fricas_constructors = fricas_constructors
+        self.fricas_ids = sorted(fricas_operations + fricas_constructors)
 
 
     def do_execute(self, code, silent, store_history=True,
@@ -231,28 +233,6 @@ class SPAD(Kernel):
         return ok_status
 
 
-    def do_complete(self, code, cursor_pos):
-        code = code[:cursor_pos]
-        default = {'matches': [], 'cursor_start': 0,
-                   'cursor_end': cursor_pos, 'metadata': dict(),
-                   'status': 'ok'}
-
-        if not code or code[-1] == ' ':
-            return default
-
-        tokens = code.replace(';', ' ').split()
-        if not tokens:
-            return default
-
-        token = tokens[-1]
-        start = cursor_pos - len(token)
-
-        matches = [m for m in self.spadcmds if m.startswith(token)]
-
-        return {'matches': matches, 'cursor_start': start,
-                'cursor_end': cursor_pos, 'metadata': dict(),'status': 'ok'}
-
-
     def do_shutdown(self, restart):
         "Changes in 5.0: <data> replaced by <text>"
         output = "-- Bye. Kernel shutdown "
@@ -266,19 +246,57 @@ class SPAD(Kernel):
         return {'restart': False}
 
 
+    # get_identifier_part is an auxiliary function
+    def get_identifier_part(self, code):
+        # A FriCAS identifier consists of alpha-numeric characters
+        # and one of the letters ! ? _. For code completion and code
+        # inspection we ignore other fancy operators, i.e,, to find
+        # the start of the identifier, we go simply backwards from the
+        # current position until we find a non-admissible character.
+        admissible = "abcdefghijklmnopqrstuvwxyz_!?0123456789"
+        n = len(code)-1
+        while n>=0 and code[n].lower() in admissible: n -= 1
+        return code[n+1:]
+
+
+    def do_complete(self, code, cursor_pos):
+        code = code[:cursor_pos]
+        token = self.get_identifier_part(code)
+        start = cursor_pos - len(token)
+        matches = [id for id in self.fricas_ids if id.startswith(token)]
+        return {'matches': matches,
+                'cursor_start': start,
+                'cursor_end': cursor_pos,
+                'metadata': dict(),
+                'status': 'ok'}
+
+
     def do_inspect(self, code, cursor_pos, detail_level=0):
         data = dict()
         code = code[:cursor_pos]
-        tokens = code.replace(';', ' ').split()
-        token = tokens[-1]
-        #start = cursor_pos - len(token)
-        r = self.server.put(')display operation {0}'.format(token))
-        if r.ok:
-            data['text/plain'] = self.server.output['stdout']
+        token = self.get_identifier_part(code)
+
+        if not token:
+            return {'status' : 'ok', 'found' : False,
+                    'data' :  {}, 'metadata' : {}}
+
+        start = cursor_pos - len(token)
+        if token in self.fricas_operations:
+            r = self.server.put(')display operation {0}'.format(token))
+        elif token in self.fricas_constructors:
+            r = self.server.put(')show {0}'.format(token))
         else:
-            data['text/plain'] = 'No information about {0}'.format(token)
-        return {'status' : 'ok', 'found' : True, 'data' : data,
-                'metadata' : dict(),}
+            return {'status' : 'ok', 'found' : False,
+                    'data' :  {},'metadata' : {}}
+
+        msg = ['No data from FriCAS']
+        if r.ok:
+            lines = self.server.output["stdout"].split('\n')
+            msg = [l for l in lines if not l.startswith('--FORMAT:')]
+
+        return {'status' : 'ok', 'found' : True,
+                'data' : {'text/plain' : '\n'.join(msg)},'metadata' : {}}
+
 
     ###################################################################
     # Auxiliary functions
@@ -411,6 +429,7 @@ class SPAD(Kernel):
         # If an error occured, simply put every output to stderr.
         out = self.server.output
         stepped_outputs = self.split_output(out['stdout'])
+        # Uncommend the following for debugging purposes.
 ##        self.send_response(self.iopub_socket, 'stream',
 ##                           {'name': 'stdout', 'text':
 ##                            'SteppedOutput: {0}'.format(stepped_outputs)})
@@ -451,25 +470,34 @@ if __name__ == '__main__':
 
     # Get all FriCAS identifiers for tab-completion.
     pid0 = Popen(['fricas', '-nosman',
+                 '-eval', ')what operations',
                  '-eval', ')what categories',
                  '-eval', ')what domains',
                  '-eval', ')what packages',
-                 '-eval', ')what operations',
                  '-eval', ')quit'],stdout=PIPE)
 
     out = pid0.stdout.readlines()
     lines = [s.decode("utf-8").rstrip() for s in out]
-    i = 0
-    while i < len(lines):
-        if '--- Categories ---' in lines[i]: break
-        i += 1
-    lines = lines[i+1:] # remove initial useless part
-    ll = [line.strip().split() for line in lines
-          if line and not line.startswith('--')
-                  and not line.startswith('  ')
-                  and not line.startswith('Operations whose names')]
-    fricas_ids = list(itertools.chain.from_iterable(ll))
-    fricas_ids.sort()
+
+    # Look for line that start the ")what operations" output.
+    while not lines.pop(0).startswith('Operations whose names satisfy '): pass
+
+    fricas_operations = []
+    line = lines.pop(0) #skip empty line from beginning
+    line = lines.pop(0)
+    while line:
+        fricas_operations.append(line)
+        line = lines.pop(0)
+    # operations already come sorted from FriCAS
+
+    # Look for line that starts the ")what categories" output,
+    # Regular expression: /^-+ Categories -*$/
+    while not lines.pop(0).startswith('--------------'): pass
+    wordlist = [x.split() for x in lines if not x.startswith('--------------')]
+    # wordlist is a list of lists. Flatten it.
+    fricas_constructors = list(itertools.chain.from_iterable(wordlist))
+    fricas_constructors.sort()
+
 
     path=os.path.dirname(os.path.abspath(__file__))
     prereq = ')lisp (load "{0}/webspad")'.format(path)
