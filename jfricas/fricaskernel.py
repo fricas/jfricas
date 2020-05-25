@@ -14,7 +14,7 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 
 
-__version__ = '0.2.17'
+__version__ = '0.3'
 
 # ********************************
 # BEGIN user configuration options
@@ -22,7 +22,6 @@ __version__ = '0.2.17'
 pycmd = ')python'
 shcmd = ')!'
 shutd = ')shutdown'
-gplot = ')gnuplot'
 
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
@@ -37,19 +36,6 @@ pretex1 = r"\def\sp{^}\def\sb{_}\def\leqno(#1){}"
 pretex2 = r"\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}"
 pretex3 = r"\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}"
 pretex = pretex1+pretex2+pretex3
-
-# gnuplot javascript files location
-gpjsf = '/static/gpjs'
-
-# gnuplot canvas template (html5)
-# 0:static_path, 1:uuid, 2:code, 3:function_call
-gptpl =r"""
-<script src="{0}/canvastext.js"></script>
-<script src="{0}/gnuplot_common.js"></script>
-<canvas id="{1}" width=600 height=400></canvas>
-<script>{2}</script>
-<script>{3}();</script>
-"""
 
 # ***************
 # END user config
@@ -157,22 +143,6 @@ class SPAD(Kernel):
             # store last shell result inside FriCAS
             self.server.put(shell_result_fricas.format(self.output))
 
-            return ok_status
-
-        if code.startswith(gplot):
-            # gnuplot
-            data = dict()
-            commands = code[len(gplot):].lstrip().split('\n')
-            cmd = ';'.join(commands)
-            uid = "plot"+"".join(str(uuid.uuid4()).split('-'))
-            cmd = 'gnuplot -e "set term canvas name {0};{1}"'.format(
-                                                     "'"+uid+"'",cmd)
-            cp = run(cmd, stdout=PIPE, stderr=STDOUT,
-                          timeout=shell_timeout, shell=True)
-            js = cp.stdout.decode()
-            data['text/html'] = gptpl.format(gpjsf, uid, js, uid)
-            self.send_response(self.iopub_socket, 'display_data',
-                               {'data': data, 'metadata': {}})
             return ok_status
 
         # send code to hunchentoot and get response from FriCAS
