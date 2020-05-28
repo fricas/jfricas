@@ -29,7 +29,7 @@ fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
 
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
-shell_result_fricas = '__system_result:="{0}"' # store sh result in Fricas
+shell_result_fricas = '__shell_result:=["{0}"]' # store sh result in FriCAS
 
 # Templates (TeX)
 pretex1 = r"\def\sp{^}\def\sb{_}\def\leqno(#1){}"
@@ -140,8 +140,10 @@ class SPAD(Kernel):
             # Storel last shell result in global python variable
             shell_result = self.output
 
-            # store last shell result inside FriCAS
-            self.server.put(shell_result_fricas.format(self.output))
+            # store last shell result inside FriCAS (list of lines)
+            s = self.output.rstrip('\n').replace('"', '_"')
+            s = shell_result_fricas.format(s.replace('\n', '",_\n"'))
+            self.server.put(s)
 
             return ok_status
 
