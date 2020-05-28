@@ -371,14 +371,6 @@ class SPAD(Kernel):
                         content += end_marker + '\n'
                     break
                 else:
-                    # From Algebra output we remove the step number output.
-                    # For that we simply remove 4 characters "()  " and
-                    # the length of the step number (which can be extracted
-                    # from the end_marker.
-                    if f == 'Algebra':
-                        import math
-                        m = int(math.floor(math.log10(step)))+5
-                        line = line[m:]
                     content += line + '\n'
 
             if f == 'Storage':

@@ -66,8 +66,8 @@
 (setf |$ioHook|
       (lambda (x &optional args)
         (cond
-         ((eq x '|startAlgebraOutput|) (ws-fmt "BEG:Algebra"))
-         ((eq x '|endOfAlgebraOutput|) (ws-fmt "END:Algebra"))
+;         ((eq x '|startAlgebraOutput|) (ws-fmt "BEG:Algebra"))
+;         ((eq x '|endOfAlgebraOutput|) (ws-fmt "END:Algebra"))
          ((eq x '|startPatternMsg|)    (ws-fmt "BEG:ERROR"))
          ((eq x '|endPatternMsg|)      (ws-fmt "END:ERROR"))
          ((eq x '|startKeyedMsg|)
@@ -85,6 +85,18 @@
            ((eq (car args) 'S2GL0016) (ws-fmt "END:Storage"))
            ('T                        (ws-fmt "END:KeyedMsg"))))
         )))
+
+;;; Override a FriCAS function in order to remove the equation number.
+(DEFUN |mathprintWithNumber| (|x|)
+  (PROG ()
+    (RETURN
+     (PROGN
+      ;(|ioHook| '|startAlgebraOutput|)
+      (|saySpadMsg| '|--FORMAT:BEG:Algebra|)
+      (|maprin| (|outputTran2| |x|))
+      (|saySpadMsg| '|--FORMAT:END:Algebra|)
+      ;(|ioHook| '|endOfAlgebraOutput|)
+      ))))
 
 ;;; interpret-block takes a code string that is interpreted as if it
 ;;; comes from a .input file.
