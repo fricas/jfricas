@@ -3,16 +3,8 @@
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
 import requests
-import uuid
 import json
 import os
-
-from IPython.core.display import display, HTML
-from IPython.display import IFrame
-
-path = os.path.abspath(__file__)
-dir_path = os.path.dirname(path)
-
 
 __version__ = '0.3'
 
@@ -47,8 +39,6 @@ try:
 except:
     static_file_path = None
 
-kernel_file_path = os.path.abspath(__file__)
-
 
 # Function to find a free port
 def get_free_port():
@@ -61,10 +51,10 @@ def get_free_port():
         return port
 
 # Get new free port
-htport=str(get_free_port())
+htport = str(get_free_port())
 
 # PID of FriCAS+HT
-pid=None
+pid = None
 
 
 class httpSPAD():
@@ -463,7 +453,7 @@ if __name__ == '__main__':
     fricas_constructors.sort()
 
 
-    path=os.path.dirname(os.path.abspath(__file__))
+    path = os.path.dirname(os.path.abspath(__file__))
     prereq = ')lisp (load "{0}/webspad")'.format(path)
     start  = ')lisp (defvar webspad::fricas-acceptor '
     start += '(webspad::start {0} "localhost"))'.format(htport)
