@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+# https://jfricas.readthedocs.io
+# https://github.com/fricas/jfricas.
+
+###################################################################
+# This file is one part of the FriCAS to Jupyter notebook bridge. It
+# implements an IPython kernel such that pressing SHIFT-ENTER in a
+# Jupyter notebook cell takes the cell content and sends it via
+# webSPAD to a webserver (hunchentoot). Hunchentoot, in turn, is
+# supposed to be connected to a FriCAS process (see webspad.lisp).
+###################################################################
 
 from ipykernel.kernelbase import Kernel
 from subprocess import Popen, run, PIPE, STDOUT
@@ -8,13 +18,9 @@ import os
 
 __version__ = '0.3'
 
-# ********************************
+###################################################################
 # BEGIN user configuration options
-# ********************************
-pycmd = ')python'
-shcmd = ')!'
-shutd = ')shutdown'
-
+###################################################################
 fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
 fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
 #fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
@@ -29,9 +35,9 @@ pretex2 = r"\def\erf\{\mathrm{erf}}\def\sinh{\mathrm{sinh}}"
 pretex3 = r"\def\zag#1#2{{{ \left.{#1}\right|}\over{\left|{#2}\right.}}}"
 pretex = pretex1+pretex2+pretex3
 
-# ***************
+###################################################################
 # END user config
-# ***************
+###################################################################
 
 try:
     import notebook.notebookapp
@@ -105,42 +111,55 @@ class SPAD(Kernel):
             'user_expressions': {},
         }
 
-        # pre-process input
-        if code.startswith(pycmd):
+        # Pre-process input for special command that are not given
+        # to FriCAS, but handled otherwise.
+        # Available are:
+        # ")shutdown" (request shutdown of FriCAS),
+        # ")python" (evaluate a python expression),
+        # ")!" (Send the cell content to a shell
+        # Note that there are other system commands in FriCAS like
+        # )help, )compile, )read.
+
+        if code.startswith(')shutdown'):
+            # Shutdown requested
+            self.do_shutdown(False)
+
+        #----------------------------------------------------------
+        cmd = ')!'
+        if code.startswith(cmd):
             # Python code in cell
-            self.output = str(eval(code[len(pycmd):].lstrip()))
+            self.output = str(eval(code[len(cmd):].lstrip()))
             self.send_response(self.iopub_socket, 'stream',
                                {'name': 'stdout', 'text': self.output})
             return ok_status
 
-        if code.startswith(shutd):
-            # Shutdown requested
-            self.do_shutdown(False)
-
-        if code.startswith(shcmd):
+        #----------------------------------------------------------
+        cmd = ')!'
+        if code.startswith(cmd):
             # Shell code in cell
             global shell_result
-            cmd = str(code[len(shcmd):].lstrip())
+            cmd = str(code[len(cmd):].lstrip())
             cp = run(cmd, stdout=PIPE, stderr=STDOUT,
                           timeout=shell_timeout, shell=True)
             self.output = cp.stdout.decode()
             self.send_response(self.iopub_socket, 'stream',
                                {'name': 'stdout', 'text': self.output})
 
-            # Storel last shell result in global python variable
+            # Store last shell result in global python variable
             shell_result = self.output
 
-            # store last shell result inside FriCAS (list of lines)
+            # Store last shell result inside FriCAS (list of lines)
             s = self.output.rstrip('\n').replace('"', '_"')
             s = shell_result_fricas.format(s.replace('\n', '",_\n"'))
             self.server.put(s)
 
             return ok_status
 
+        #----------------------------------------------------------
         # send code to hunchentoot and get response from FriCAS
 
         # It would be enough to send just the whole code string,
-        # because webspad takes care if the code consists of several
+        # because webSPAD takes care if the code consists of several
         # lines. However, if, for example, the input cell contains the
         # following code lines.
         #   2+3
@@ -260,9 +279,9 @@ class SPAD(Kernel):
                 'data' : {'text/plain' : '\n'.join(msg)},'metadata' : {}}
 
 
-    ###################################################################
+    #--------------------------------------------------------------
     # Auxiliary functions
-    ###################################################################
+    #--------------------------------------------------------------
 
     def addLinks(self, s):
         """Every word of the form Aaaa is replaced by
@@ -422,7 +441,10 @@ if __name__ == '__main__':
     from ipykernel.kernelapp import IPKernelApp
     import itertools
 
-    # Get all FriCAS identifiers for tab-completion.
+    # Get all FriCAS identifiers for tab-completion into the variables
+    # fricas_operations and fricas_constructors.
+    # We need this for do_complete and do_inspect.
+    # We start a separate process tho get this information.
     pid0 = Popen(['fricas', '-nosman',
                  '-eval', ')what operations',
                  '-eval', ')what categories',
@@ -437,7 +459,7 @@ if __name__ == '__main__':
     while not lines.pop(0).startswith('Operations whose names satisfy '): pass
 
     fricas_operations = []
-    line = lines.pop(0) #skip empty line from beginning
+    line = lines.pop(0) # skip empty line from beginning
     line = lines.pop(0)
     while line:
         fricas_operations.append(line)
@@ -452,7 +474,8 @@ if __name__ == '__main__':
     fricas_constructors = list(itertools.chain.from_iterable(wordlist))
     fricas_constructors.sort()
 
-
+    # Prepare to load webSPAD and start the Hunchentoot webserver
+    # while starting FriCAS.
     path = os.path.dirname(os.path.abspath(__file__))
     prereq = ')lisp (load "{0}/webspad")'.format(path)
     start  = ')lisp (defvar webspad::fricas-acceptor '
