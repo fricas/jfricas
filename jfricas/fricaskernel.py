@@ -21,8 +21,8 @@ __version__ = '0.3'
 ###################################################################
 # BEGIN user configuration options
 ###################################################################
-fricas_start_options = '-noht'   ### -nox blocks if draw is used (others?)
-fricas_terminal = []             ###  E.g. ['xterm','-e'] for 'xterm'
+fricas_start_options = ''   ### -nox blocks if draw is used (others?)
+fricas_terminal = []        ###  E.g. ['xterm','-e'] for 'xterm'
 #fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
 
 shell_timeout = 15 # Timeout for shell commands in secs.
@@ -114,18 +114,15 @@ class SPAD(Kernel):
         # Pre-process input for special command that are not given
         # to FriCAS, but handled otherwise.
         # Available are:
-        # ")shutdown" (request shutdown of FriCAS),
+        # ")quit" (tell user to quit via jupyter notebook means)
+        # ")pquit" (tell user to quit via jupyter notebook means)
         # ")python" (evaluate a python expression),
         # ")!" (Send the cell content to a shell
         # Note that there are other system commands in FriCAS like
         # )help, )compile, )read.
 
-        if code.startswith(')shutdown'):
-            # Shutdown requested
-            self.do_shutdown(False)
-
         #----------------------------------------------------------
-        cmd = ')!'
+        cmd = ')python'
         if code.startswith(cmd):
             # Python code in cell
             self.output = str(eval(code[len(cmd):].lstrip()))
@@ -197,7 +194,25 @@ class SPAD(Kernel):
                 block = line
         if block: blocks.append(block)
 
+        # Now we have all the blocks. We take care of a special case,
+        # namely if the user wants to quit FriCAS. In that case,
+        # return a message that the user should close the respective
+        # notebook by means of the Jupyter menu "File -> Close and Halt".
+        # We treat this like an error and abort further execution of code
+        # following the )quit line.
+
+        quit_msg = 'Use the menu "File -> Close and Halt" to quit the notebook!'
+
         for block in blocks:
+            if block.startswith(')'):
+                cmd = block[1:]
+                if cmd.startswith('p'): cmd = cmd[1:]
+                if cmd in ['q', 'qu', 'qui', 'quit']:
+                    self.send_response(self.iopub_socket, 'stream',
+                                       {'name': 'stderr', 'text': quit_msg})
+                    # We abort evaluation at a ")quit" situation.
+                    return ok_status
+
             r = self.server.put(block)
             # Uncomment the follwing for debugging purposes.
 ##            self.send_response(self.iopub_socket, 'stream',
@@ -217,8 +232,9 @@ class SPAD(Kernel):
     def do_shutdown(self, restart):
         "Changes in 5.0: <data> replaced by <text>"
         output = "-- Bye. Kernel shutdown "
-        stream_content = {'name': 'stdout', 'text': output}
-        self.send_response(self.iopub_socket, 'stream', stream_content)
+        self.send_response(self.iopub_socket, 'stream',
+                           {'name': 'stdout', 'text': output})
+
         try:
             r = self.server.put(")quit")
             pid.terminate() # terminate fricas+HT
