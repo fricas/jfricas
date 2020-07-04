@@ -156,10 +156,13 @@
          ;;; get-output-stream-string, we must make sure that the
          ;;; streams are created via make-string-output-stream.
          ;;; Therefore, we first save the original streams.
+         ;;; If |$formattedOutputStream| is not in the FriCAS code base,
+         ;;; then that stream is not considered.
+         (formattedp (boundp 'boot::|$formattedOutputStream|))
+         (s-formatted (if formattedp boot::|$formattedOutputStream|))
          (s-stdout    boot::*standard-output*)
          (s-stderr    boot::*error-output*)
          (s-algebra   boot::|$algebraOutputStream|)
-         (s-formatted boot::|$formattedOutputStream|)
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
          (s-texmacs   boot::|$texmacsOutputStream|))
@@ -168,20 +171,20 @@
     (setf boot::*standard-output*        (make-string-output-stream))
     (setf boot::*error-output*           boot::*standard-output*)
     (setf boot::|$algebraOutputStream|   boot::*standard-output*)
-    (setf boot::|$formattedOutputStream| boot::*standard-output*)
     (setf boot::|$texOutputStream|       boot::*standard-output*)
     (setf boot::|$mathmlOutputStream|    boot::*standard-output*)
-    (setf boot::|$formattedOutputStream| boot::*standard-output*)
     (setf boot::|$texmacsOutputStream|   boot::*standard-output*)
+    (if formattedp
+        (setf boot::|$formattedOutputStream| boot::*standard-output*))
 
     ;;; eval and return true if there was an error
     (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| input) "T" "F"))
 
     (setf (r-stdout data) (get-output-stream-string boot::*standard-output*))
+    (if formattedp (setf boot::|$formattedOutputStream| s-formatted))
     (setf boot::*standard-output*        s-stdout)
     (setf boot::*error-output*           s-stderr)
     (setf boot::|$algebraOutputStream|   s-algebra)
-    (setf boot::|$formattedOutputStream| s-formatted)
     (setf boot::|$texOutputStream|       s-tex)
     (setf boot::|$mathmlOutputStream|    s-mathml)
     (setf boot::|$texmacsOutputStream|   s-texmacs)
@@ -206,19 +209,19 @@
           (r-input data)))
 
 
-;;; Make the url http://www.localhost:PORT/eval?code=sin(x) available.
+;;; Make the url http://localhost:PORT/eval?code=sin(x) available.
 (hunchentoot:define-easy-handler (fricas-eval :uri "/eval") (code)
   (setf (hunchentoot:content-type*) "text/plain")
   (format nil "~A~%" (spad-eval code)))
 
 ;;; Make the url
-;;; http://www.localhost:PORT/raw?code=integrate(sin(x),x) available.
+;;; http://localhost:PORT/raw?code=integrate(sin(x),x) available.
 (hunchentoot:define-easy-handler (fricas-raw :uri "/raw") (code)
   (setf (hunchentoot:content-type*) "text/plain")
   (format nil "~A~%" (webspad-eval code)))
 
 ;;; Make the url
-;;; http://www.localhost:PORT/json?code=D(sin(x),x) available.
+;;; http://localhost:PORT/json?code=D(sin(x),x) available.
 (hunchentoot:define-easy-handler (fricas-json :uri "/json") (code)
   (setf (hunchentoot:content-type*) "text/plain")
   (format nil "~A~%" (encode-json (webspad-eval code))))
