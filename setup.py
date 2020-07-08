@@ -4,10 +4,9 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
-kernel_sdir = 'jfricas/kspec'
+kernel_srcdir = 'jfricas/kspec'
 kernel_name = 'jfricas'
-kernel_version = '0.2.17'
-prefix = None
+kernel_version = '0.3'
 ldescr = readme()
 
 setup(name=kernel_name,
@@ -25,9 +24,11 @@ setup(name=kernel_name,
       keywords='fricas, jupyter, computer_algebra',
       url='http://github.com/fricas/jfricas',
       author='Kurt Pagani, Ralf Hemmecke',
-      author_email='nilqed@gmail.com',
+      author_email='jfricas@hemmecke.org',
       license='BSD',
       packages=['jfricas'],
+      package_data={'jfricas': ['webspad.lisp'],},
+      python_requires='>=3.5',
       install_requires=[
           'requests',
           'jupyter',
@@ -35,37 +36,32 @@ setup(name=kernel_name,
       include_package_data=True,
       zip_safe=False)
 
-
-from jupyter_client.kernelspec import KernelSpecManager as KSM
-from IPython.utils.tempdir import TemporaryDirectory
-import json
-import sys
-import os
-
+# Additionally, we must install the kernelspec of jfricas for jupyter.
 kernel_json = {
     "argv": ["python3", "-m","jfricas.fricaskernel","-f","{connection_file}"],
     "display_name": "FriCAS",
     "language": "spad",
 }
 
-def install_my_kernel_spec(user=True, prefix=None):
+def install_kernel_spec():
+    from jupyter_client.kernelspec import KernelSpecManager as KSM
+    from IPython.utils.tempdir import TemporaryDirectory
+    import json
+    import sys
+    import os
+    import getpass
+    # Default is a install into $HOME/.local.
+    user=True
+    prefix=None
+    if (getpass.getuser()=='root') or (sys.prefix != '/usr'):
+        user=False
+        prefix=sys.prefix
+
     with TemporaryDirectory() as td:
         os.chmod(td, 0o755) # Starts off as 700, not user readable
         with open(os.path.join(td, 'kernel.json'), 'w') as f:
             json.dump(kernel_json, f, sort_keys=True)
-        # TODO: Copy any resources
-        print('Installing Jupyter kernel spec')
-        KSM().install_kernel_spec(td, kernel_name, user=user, replace=True, prefix=prefix)
+        KSM().install_kernel_spec(td, kernel_name, replace=True,
+                                  user=user, prefix=prefix)
 
-
-
-user=False
-prefix=sys.prefix
-if prefix == '/usr':
-  user=True
-  prefix=None
-# else we have a venv
-
-#KSM().install_kernel_spec(kernel_sdir, kernel_name, user=user, replace=True, prefix=prefix)
-
-install_my_kernel_spec(user=user, prefix=prefix)
+install_kernel_spec()
