@@ -21,10 +21,6 @@ __version__ = '0.3'
 ###################################################################
 # BEGIN user configuration options
 ###################################################################
-fricas_start_options = ''   ### -nox blocks if draw is used (others?)
-fricas_terminal = []        ###  E.g. ['xterm','-e'] for 'xterm'
-#fricas_terminal = ['gnome-terminal', '--title=jfricas', '--']
-
 shell_timeout = 15 # Timeout for shell commands in secs.
 shell_result = None # store last sh result in python
 shell_result_fricas = '__shell_result:=["{0}"]' # store sh result in FriCAS
@@ -497,6 +493,31 @@ if __name__ == '__main__':
     start  = ')lisp (defvar webspad::fricas-acceptor '
     start += '(webspad::start {0} "localhost"))'.format(htport)
 
-    pid = Popen(fricas_terminal +
-                ['fricas','-eval',prereq,'-eval',start,fricas_start_options])
+    # A couple of ways to start FriCAS
+    # --------------------------------
+    # Uncomment or edit as you like.
+    # Default:
+    pid = Popen(['fricas','-eval',prereq,'-eval',start])
+
+    # Start the FriCAS process in a separate terminal.
+    # That might be good for controlling FriCAS directly in case
+    # the Jupyter interface hangs or a process runs too long.
+    # Of course, the start-fricas-in-terminal way also works
+    # with additional fricas options.
+    ## pid = Popen(['gnome-terminal', '--title=jfricas', '--'] +
+    ##             ['fricas','-eval',prereq,'-eval',start])
+
+    # Start the FriCAS process without opening the HyperDoc window.
+    ## pid = Popen(['fricas','-eval',prereq,'-eval',start] +
+    ##             ['-noht])
+
+    # Start the FriCAS process by calling only FRICASsys.
+    # The following does currently not work.
+    ## pid = Popen(['fricas','-nosman','-eval',prereq,'-eval',start])
+    # but
+    ## pid = Popen(['gnome-terminal', '--title=jfricas', '--'] +
+    ##             ['fricas','-nosman','-eval',prereq,'-eval',start])
+    # does.
+
+    # Start the kernel.
     IPKernelApp.launch_instance(kernel_class=SPAD)
