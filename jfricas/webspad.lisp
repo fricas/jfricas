@@ -165,17 +165,18 @@
          (s-algebra   boot::|$algebraOutputStream|)
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
-         (s-texmacs   boot::|$texmacsOutputStream|))
+         (s-texmacs   boot::|$texmacsOutputStream|)
+         (s           nil))
 
     ;;; create empty streams
     (setf boot::*standard-output*        (make-string-output-stream))
     (setf boot::*error-output*           boot::*standard-output*)
-    (setf boot::|$algebraOutputStream|   boot::*standard-output*)
-    (setf boot::|$texOutputStream|       boot::*standard-output*)
-    (setf boot::|$mathmlOutputStream|    boot::*standard-output*)
-    (setf boot::|$texmacsOutputStream|   boot::*standard-output*)
-    (if formattedp
-        (setf boot::|$formattedOutputStream| boot::*standard-output*))
+    (setf s (boot::|mkOutputConsoleStream|))
+    (setf boot::|$algebraOutputStream|   s)
+    (setf boot::|$texOutputStream|       s)
+    (setf boot::|$mathmlOutputStream|    s)
+    (setf boot::|$texmacsOutputStream|   s)
+    (if formattedp (setf boot::|$formattedOutputStream| s))
 
     ;;; eval and return true if there was an error
     (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| input) "T" "F"))
