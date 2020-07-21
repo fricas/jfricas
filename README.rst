@@ -4,7 +4,9 @@ FriCAS Jupyter Kernel (jfricas)
 
 This project implements a Jupyter kernel for `FriCAS`_ .
 
-The full documentation is at `jfricas`_.
+Documentation: https://jfricas.readthedocs.io
+
+Git repository: https://github.com/fricas/jfricas
 
 :Authors:
     Ralf Hemmecke,
@@ -18,5 +20,4 @@ The full documentation is at `jfricas`_.
 
 
 .. _FriCAS: https://github.com/fricas/fricas
-.. _jfricas: https://jfricas.readthedocs.io
 .. _Simplified BSD License: https://github.com/fricas/jfricas/blob/master/LICENSE
