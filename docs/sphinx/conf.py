@@ -2,7 +2,7 @@
 #
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
 
@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'jFriCAS'
-copyright = '2019, Ralf Hemmecke, Kurt Pagani'
-author = 'Ralf Hemmecke, Kurt Pagani'
+copyright = '2019-2020, Ralf Hemmecke and Kurt Pagani'
+author = 'Ralf Hemmecke and Kurt Pagani'
 
 # The full version, including alpha/beta/rc tags
 release = '0.3'
@@ -30,7 +30,7 @@ release = '0.3'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
+extensions = ['sphinx.ext.mathjax'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -52,4 +52,17 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
+
+master_doc = 'index'
+
+rst_epilog = """
+.. _FriCAS: https://fricas.github.io/
+.. _Jupyter: https://jupyter.org/
+.. _Requests: http://python-requests.org/
+.. _Hunchentoot: https://edicl.github.io/hunchentoot/
+.. _MathJax: https://mathjax.org/
+.. _`kernel.json`: https://github.com/fricas/jfricas/blob/master/setup.py
+.. _`webspad.lisp`: https://github.com/fricas/jfricas/blob/master/jfricas/webspad.lisp
+.. _`fricaskernel.py`: https://github.com/fricas/jfricas/blob/master/jfricas/fricaskernel.py
+"""
