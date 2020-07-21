@@ -16,7 +16,7 @@ import requests
 import json
 import os
 
-__version__ = '0.3'
+__version__ = '1.0.0'
 
 ###################################################################
 # BEGIN user configuration options

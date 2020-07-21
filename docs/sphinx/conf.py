@@ -22,7 +22,7 @@ copyright = '2019-2020, Ralf Hemmecke and Kurt Pagani'
 author = 'Ralf Hemmecke and Kurt Pagani'
 
 # The full version, including alpha/beta/rc tags
-release = '0.3'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
