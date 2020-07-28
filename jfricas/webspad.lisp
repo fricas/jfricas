@@ -101,10 +101,14 @@
 ;;; interpret-block takes a code string that is interpreted as if it
 ;;; comes from a .input file.
 (DEFUN |interpret-block| (|code|)
-  (PROG (|$ncMsgList| |$erMsgToss| |$lastPos| |$EchoLines| |st|)
-    (DECLARE (SPECIAL |$ncMsgList| |$erMsgToss| |$lastPos| |$EchoLines|))
+  (PROG (|$newcompErrorCount| |$inclAssertions| |$ncMsgList|
+         |$erMsgToss| |$lastPos| |$EchoLines| |st|)
+        (DECLARE (SPECIAL |$newcompErrorCount| |$inclAssertions| |$ncMsgList|
+                          |$erMsgToss| |$lastPos| |$EchoLines|))
     (RETURN
      (PROGN
+      (SETQ |$newcompErrorCount| 0)
+      (SETQ |$inclAssertions| NIL)
       (SETQ |$EchoLines| NIL)
       (SETQ |$lastPos| |$nopos|)
       (SETQ |$erMsgToss| NIL)
