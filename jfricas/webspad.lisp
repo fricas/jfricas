@@ -92,6 +92,11 @@
       ;(|ioHook| '|endOfAlgebraOutput|)
       ))))
 
+(defun OBEY (S)
+      (sb-ext::process-exit-code
+       (sb-ext::run-program "/bin/sh" (list "-c" S) :input t
+        :output *standard-output* :error *standard-output*)))
+
 ;;; interpret-block takes a code string that is interpreted as if it
 ;;; comes from a .input file.
 (DEFUN |interpret-block| (|code|)
@@ -146,6 +151,9 @@
   (error?    "" :type string)
   (input     "" :type string))
 
+;;; One stream that catches all output.
+(defvar webspad-stream (make-string-output-stream))
+
 (defun webspad-eval (input)
   (let* (
         ;;; store original input argument
@@ -164,12 +172,11 @@
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
          (s-texmacs   boot::|$texmacsOutputStream|)
-         (s           nil))
+         (*standard-output* webspad-stream)
+         (*standard-error-* *standard-output*)
+         (s           (boot::|mkOutputConsoleStream|))) ; use *standard-output*
 
     ;;; create empty streams
-    (setf boot::*standard-output*        (make-string-output-stream))
-    (setf boot::*error-output*           boot::*standard-output*)
-    (setf s (boot::|mkOutputConsoleStream|))
     (setf boot::|$algebraOutputStream|   s)
     (setf boot::|$texOutputStream|       s)
     (setf boot::|$mathmlOutputStream|    s)
@@ -181,8 +188,7 @@
 
     (setf (r-stdout data) (get-output-stream-string boot::*standard-output*))
     (if formattedp (setf boot::|$formattedOutputStream| s-formatted))
-    (setf boot::*standard-output*        s-stdout)
-    (setf boot::*error-output*           s-stderr)
+
     (setf boot::|$algebraOutputStream|   s-algebra)
     (setf boot::|$texOutputStream|       s-tex)
     (setf boot::|$mathmlOutputStream|    s-mathml)
