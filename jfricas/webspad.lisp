@@ -11,12 +11,6 @@
 ;;;     FriCAS output.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Load the Hunchentoot webserver.
-;;; https://edicl.github.io/hunchentoot/
-(require :asdf)
-(require :hunchentoot)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; BOOT is a Package in FriCAS.
 ;;  This part adds a few functions to the BOOT package of FriCAS
 ;;; to make the FriCAS output contain a number of markers (via the
