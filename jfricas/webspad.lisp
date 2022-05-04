@@ -173,7 +173,7 @@
          (s-mathml    boot::|$mathmlOutputStream|)
          (s-texmacs   boot::|$texmacsOutputStream|)
          (*standard-output* webspad-stream)
-         (*standard-error-* *standard-output*)
+         (*error-output* *standard-output*)
          (s           (boot::|mkOutputConsoleStream|))) ; use *standard-output*
 
     ;;; create empty streams
