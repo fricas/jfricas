@@ -173,7 +173,7 @@ class SPAD(Kernel):
         #     a new input block.
         # (d) All lines that begin with a space character are associated
         #     with the current block.
-        # Then we handle one block afte the other.
+        # Then we handle one block after the other.
         lines = code.split('\n')
         blocks = []
         block = ""
