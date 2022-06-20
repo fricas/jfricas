@@ -92,11 +92,6 @@
       ;(|ioHook| '|endOfAlgebraOutput|)
       ))))
 
-(defun OBEY (S)
-      (sb-ext::process-exit-code
-       (sb-ext::run-program "/bin/sh" (list "-c" S) :input t
-        :output *standard-output* :error *standard-output*)))
-
 ;;; interpret-block takes a code string that is interpreted as if it
 ;;; comes from a .input file.
 (DEFUN |interpret-block| (|code|)
@@ -172,6 +167,7 @@
          (s-tex       boot::|$texOutputStream|)
          (s-mathml    boot::|$mathmlOutputStream|)
          (s-texmacs   boot::|$texmacsOutputStream|)
+         (boot::*OBEY-STDOUT* T)
          (*standard-output* webspad-stream)
          (*error-output* *standard-output*)
          (s           (boot::|mkOutputConsoleStream|))) ; use *standard-output*
