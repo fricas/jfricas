@@ -135,7 +135,7 @@
 
 (defpackage webspad
     (:use common-lisp)
-    (:documentation "see docs"))
+    (:documentation "see source code"))
 
 (in-package :webspad)
 
