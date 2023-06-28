@@ -92,24 +92,6 @@
       ;(|ioHook| '|endOfAlgebraOutput|)
       ))))
 
-;;; interpret-block takes a code string that is interpreted as if it
-;;; comes from a .input file.
-(DEFUN |interpret-block| (|code|)
-  (PROG (|$newcompErrorCount| |$inclAssertions| |$ncMsgList|
-         |$erMsgToss| |$lastPos| |$EchoLines| |st|)
-        (DECLARE (SPECIAL |$newcompErrorCount| |$inclAssertions| |$ncMsgList|
-                          |$erMsgToss| |$lastPos| |$EchoLines|))
-    (RETURN
-     (PROGN
-      (SETQ |$newcompErrorCount| 0)
-      (SETQ |$inclAssertions| NIL)
-      (SETQ |$EchoLines| NIL)
-      (SETQ |$lastPos| |$nopos|)
-      (SETQ |$erMsgToss| NIL)
-      (SETQ |$ncMsgList| NIL)
-      (SETQ |st| (MAKE-STRING-INPUT-STREAM |code|))
-      (|intloopInclude0| |st| '|webspad| 0)))))
-
 ;;; Following function calls FriCAS for evaluation of code and returns
 ;;; true if ther is an error and nil otherwise.
 (defun |webspad-parseAndEvalStr| (code)
@@ -123,7 +105,7 @@
 
   ;;; code might consist of multiple lines (i.e. contain newline
   ;;; characters)
-  (eq (catch 'SPAD_READER (catch '|top_level| (|interpret-block| code)))
+  (eq (catch 'SPAD_READER (catch '|top_level| (|interpret_block| code)))
       '|restart|))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
