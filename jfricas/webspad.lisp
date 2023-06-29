@@ -60,8 +60,8 @@
 (setf |$ioHook|
       (lambda (x &optional args)
         (cond
-;         ((eq x '|startAlgebraOutput|) (ws-fmt "BEG:Algebra"))
-;         ((eq x '|endOfAlgebraOutput|) (ws-fmt "END:Algebra"))
+         ((eq x '|startAlgebraOutput|) (ws-fmt "BEG:Algebra"))
+         ((eq x '|endOfAlgebraOutput|) (ws-fmt "END:Algebra"))
          ((eq x '|startPatternMsg|)    (ws-fmt "BEG:ERROR"))
          ((eq x '|endPatternMsg|)      (ws-fmt "END:ERROR"))
          ((eq x '|startKeyedMsg|)
@@ -80,18 +80,6 @@
            ('T                        (ws-fmt "END:KeyedMsg"))))
         )))
 
-;;; Override a FriCAS function in order to remove the equation number.
-(DEFUN |mathprintWithNumber| (|x|)
-  (PROG ()
-    (RETURN
-     (PROGN
-      ;(|ioHook| '|startAlgebraOutput|)
-      (|saySpadMsg| '|--FORMAT:BEG:Algebra|)
-      (|maprin| (|outputTran2| |x|))
-      (|saySpadMsg| '|--FORMAT:END:Algebra|)
-      ;(|ioHook| '|endOfAlgebraOutput|)
-      ))))
-
 ;;; Following function calls FriCAS for evaluation of code and returns
 ;;; true if ther is an error and nil otherwise.
 (defun |webspad-parseAndEvalStr| (code)
@@ -102,6 +90,7 @@
   (setf |$htmlFormat| NIL)       ; we don't want Html output
   (setf |$openMathFormat| NIL)   ; we don't want OpenMath output
   (setf |$MARGIN| 0)             ; we don't want indentation
+  (setf |$print_equatnum| NIL)   ; we don't want indentation
 
   ;;; code might consist of multiple lines (i.e. contain newline
   ;;; characters)
