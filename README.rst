@@ -14,7 +14,7 @@ Git repository: https://github.com/fricas/jfricas
 
     (and sundry other good-natured folks)
 
-:Version: 1.0.0 (22-Jul-2020)
+:Version: 2.0.0 (22-Jul-2023)
 
 :License: `Simplified BSD License`_
 

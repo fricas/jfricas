@@ -9,9 +9,13 @@ https://github.com/fricas/jfricas
 it makes a Jupyter_ notebook frontend for FriCAS_ possible.
 
 When a Jupyter_ notebook of type FriCAS_ is opened, **jFriCAS** starts
-a new FriCAS_ process and a webserver (Hunchentoot_). In fact,
-**jFriCAS** makes FriCAS_ behave like a webserver, i.e., responding to
-GET and POST requests.
+a new FriCAS_ process and a webserver (Hunchentoot_).
+
+Starting with FriCAS_ 1.3.9, the Hunchentoot_ webserver is included in
+the binary distribution for Linux (fricas-x.y.z.amd64.tar.bz2).
+
+In fact, **jFriCAS** makes FriCAS_ behave like a webserver, i.e.,
+responding to GET and POST requests.
 
 On the Python side these GET and POST requests are handled by the
 requests_ library inside the wrapper kernel `fricaskernel.py`_. To put

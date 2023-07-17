@@ -18,11 +18,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'jFriCAS'
-copyright = '2019-2020, Ralf Hemmecke and Kurt Pagani'
+copyright = '2019-2023, Ralf Hemmecke and Kurt Pagani'
 author = 'Ralf Hemmecke and Kurt Pagani'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,8 +30,7 @@ release = '1.0.0'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax'
-]
+extensions = ['sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

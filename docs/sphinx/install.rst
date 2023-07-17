@@ -20,11 +20,13 @@ Prerequisites
 -------------
 The only supported OS at the moment is GNU/Linux - Debian/Ubuntu.
 
-For some other OS a docker image will be provided (soon).
-
-We require a version of FriCAS_ which was compiled with a `Common
-Lisp`_ that supports multithreading and `Hunchentoot`_.
+We require a version of FriCAS_ which was compiled with a
+`Common Lisp`_ that supports multithreading and Hunchentoot_.
 We recommend `SBCL`_ 1.4.5 or later.
+
+See the
+`FriCAS installation guide <http://fricas.github.io/install.html>`_
+in order to install a FriCAS_ version that you can use with **jFriCAS**.
 
 Since Python 2.7 is not maintained anymore, we require Python3_.
 We recommend Python 3.6 or later.
@@ -45,20 +47,6 @@ whether your system's ``python`` refer to version 3 or higher.
 ::
 
    $ sudo apt install python3-pip
-
-In order to load Common Lisp programs we require `ASDF`_ (v3.3 or
-later). Install `cl-asdf`_ as follows:
-::
-
-   $ sudo apt install cl-asdf
-
-
-The `Hunchentoot`_ webserver (v1.2.35 or later). `cl-hunchentoot`_
-can be installed by:
-::
-
-   $ sudo apt install cl-hunchentoot
-
 
 Install Jupyter_ system-wide via
 ::
@@ -83,6 +71,9 @@ If the prerequisites are satisfied, installing **jFriCAS** from
 ::
 
    $ pip3 install jfricas
+
+Note that **jFriCAS** 1.0.0 only works under a particular setup that
+we do not support anymore. Use version 2.0.0.
 
 The ``kernel.json`` file will be installed automatically by the above
 command.
@@ -174,66 +165,86 @@ The following sequence of commands show how to check the presence and
 (if present) the versions of the required programs:
 ::
 
-  echo ")version" | fricas -nosman
-        Value = "FriCAS 1.3.5 compiled at Sun Feb  3 18:21:59 UTC 2019"
+   fricas --version
+        FriCAS a3c1d1dc5829126604345db3d672c2386d9296ae
+        based on sbcl 2.1.11.debian
 
-  echo ")lisp (lisp-implementation-type)" | fricas -nosman
+   echo ")lisp (lisp-implementation-type)" | fricas -nosman
         Value = "SBCL", required: SBCL
 
-  echo ")lisp (lisp-implementation-version)" | fricas -nosman
-        Value = "1.4.5.debian", required: >= 1.2.6
+   echo ")lisp (lisp-implementation-version)" | fricas -nosman
+        Value = "2.1.11.debian", required: >= 1.2.6
 
-  python3 --version
-        Python 3.6.9, required: >= 3.3,
+   python3 --version
+        Python 3.10.6, required: >= 3.3,
 
-  pip3 --version
-        pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.6))
+   pip3 --version
+        pip 22.0.2 from /usr/lib/python3/dist-packages/pip (python 3.10)
 
-  pip3 show requests
+   pip3 show requests
         Name: requests
-        Version: 2.22.0
+        Version: 2.31.0
         Summary: Python HTTP for Humans.
-        Home-page: http://python-requests.org
-  Install: pip3 install requests
+        Home-page: Home-page: https://requests.readthedocs.io
+   Install: pip3 install requests
 
-  pip3 freeze (should show something like ...
-        ipykernel==4.8.2
-        ipython==6.4.0
+   pip3 freeze             should show something like ...
+        ipykernel==6.24.0
+        ipython==8.14.0
         ipython-genutils==0.2.0
-        ipywidgets==7.2.1
-        jsonschema==2.6.0
+        ipywidgets==8.0.7
+        jsonschema==4.18.0
+        jsonschema-specifications==2023.6.1
         jupyter==1.0.0
-        jupyter-client==5.2.3
-        jupyter-console==5.2.0
-        jupyter-core==4.4.0
+        jupyter-console==6.6.3
+        jupyter-contrib-core==0.4.2
+        jupyter-contrib-nbextensions==0.7.0
+        jupyter-events==0.6.3
+        jupyter-highlight-selected-word==0.2.0
+        jupyter-nbextensions-configurator==0.6.3
+        jupyter_client==8.3.0
+        jupyter_core==5.3.1
+        jupyter_server==2.7.0
+        jupyter_server_terminals==0.4.4
+        jupyterlab-pygments==0.2.2
+        jupyterlab-widgets==3.0.8
+        jupytext==1.14.7
         ...
-  otherwise install jupyter with:
-  pip3 install jupyter
 
-  jupyter --version
+   otherwise install jupyter with:
+   pip3 install jupyter
+
+   jupyter --version
         4.6.3
+        Selected Jupyter core packages...
+        IPython          : 8.14.0
+        ipykernel        : 6.24.0
+        ipywidgets       : 8.0.7
+        jupyter_client   : 8.3.0
+        jupyter_core     : 5.3.1
+        jupyter_server   : 2.7.0
+        jupyterlab       : not installed
+        nbclient         : 0.8.0
+        nbconvert        : 7.6.0
+        nbformat         : 5.9.0
+        notebook         : 6.5.4
+        qtconsole        : 5.4.3
+        traitlets        : 5.9.0
 
-  apt list cl-asdf
-        cl-asdf/bionic,bionic,now 2:3.3.1-1 all [installed,automatic]
+   cat /etc/os-release
 
-  apt list cl-hunchentoot
-        cl-hunchentoot/bionic,bionic,now 1.2.35-1 all [installed]
-
-
-  cat /etc/os-release
-
-  NAME="Ubuntu"
-  VERSION="18.04.2 LTS (Bionic Beaver)"
-  ID=ubuntu
-  ID_LIKE=debian
-  PRETTY_NAME="Ubuntu 18.04.2 LTS"
-  VERSION_ID="18.04"
-  HOME_URL="https://www.ubuntu.com/"
-  SUPPORT_URL="https://help.ubuntu.com/"
-  BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-  PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-  VERSION_CODENAME=bionic
-  UBUNTU_CODENAME=bionic
+   PRETTY_NAME="Ubuntu 22.04.2 LTS"
+   NAME="Ubuntu"
+   VERSION_ID="22.04"
+   VERSION="22.04.2 LTS (Jammy Jellyfish)"
+   VERSION_CODENAME=jammy
+   ID=ubuntu
+   ID_LIKE=debian
+   HOME_URL="https://www.ubuntu.com/"
+   SUPPORT_URL="https://help.ubuntu.com/"
+   BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+   PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+   UBUNTU_CODENAME=jammy
 
 
 References
@@ -241,47 +252,7 @@ References
 .. _Python3: https://www.python.org/
 .. _Pip3: https://pypi.org/project/pip/
 .. _Jupyter: https://jupyter.org/
-.. _cl-asdf: https://tracker.debian.org/pkg/cl-asdf
-.. _cl-hunchentoot: https://tracker.debian.org/pkg/hunchentoot
 .. _Hunchentoot: https://edicl.github.io/hunchentoot/
 .. _Common Lisp: https://en.wikipedia.org/wiki/Common_Lisp
 .. _SBCL: http://sbcl.org/
-.. _ASDF: https://common-lisp.net/project/asdf/
 .. _Firefox: https://www.mozilla.org/en-US/
-
-+------------------------+------------+----------+------------------+
-| App / Versions, OS     | Min. ver.  | Tested   | OS/inst          |
-+========================+============+==========+==================+
-| `FriCAS`_              | 1.3.2      | 1.3.5    | Deb/Ub (make)    |
-+------------------------+------------+----------+------------------+
-| `Python3`_             | 3.5        | 3.6.9    | Deb/Ub (apt)     |
-+------------------------+------------+----------+------------------+
-| `Pip3`_                | 9.0        | 9.0.1    | apt              |
-+------------------------+------------+----------+------------------+
-| `Jupyter`_             | 4.4        | 4.6.3    | pip3             |
-+------------------------+------------+----------+------------------+
-| `Requests`_            | 2.22.0     | 2.22.0   | pip3             |
-+------------------------+------------+----------+------------------+
-| `cl-asdf`_             | 3.3        | 3.3.1    | Deb/Ub (apt)     |
-+------------------------+------------+----------+------------------+
-| `cl-hunchentoot`_      | 1.2.35     | 1.2.35   | Deb/Ub (apt)     |
-+------------------------+------------+----------+------------------+
-
-
-iFriCAS
--------
-An earlier attempt to provide a jupyter kernel for FriCAS_ that was
-LISP based was called **iFriCAS**.
-Because it has been registered with the same kernel name: ``FriCAS``,
-you cannot use it togeter with **jFriCAS**.
-
-If ::
-
-    $ jupyter kernelspec list
-
-shows ``ifricas`` as available kernel, then you have to remove it by
-::
-
-    $ jupyter kernelspec remove ifricas
-
-or edit the name in ``kernel.json`` in the respective directory.
