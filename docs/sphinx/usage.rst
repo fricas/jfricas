@@ -99,33 +99,26 @@ With the help of MathJax_, **jFriCAS** can show output in a nicely
 rendered form. This feature can be switched on via
 ::
 
- )set output tex on
- )set output algebra off
+   )set output algebra off
+   setFormat!(FormatMathJax)$JFriCASSupport
+
 
 For example::
 
-  exp(sin x)/(exp(x)+x)
+   exp(sin x)/(exp(x)+x)
 
 appears as
 
-  :math:`\frac{{e}^{\sin\left(x\right)}}{{e}^{x}+x}`
+   :math:`\frac{{e}^{\sin\left(x\right)}}{{e}^{x}+x}`
 
 instead of the standard 2D output
 ::
 
-    sin(x)
-  %e
-  --------
-     x
-   %e  + x
+     sin(x)
+   %e
+   --------
+      x
+    %e  + x
 
 If the rendered output is too small, try to right-click on it and use
 `Math Settings` -> `Scale All Math` to adjust it to your preferred size.
-
-Note that MathJax_ cannot always deal correctly with the TeX output of
-FriCAS_. There is a new output format in preparation
-
-
-  https://github.com/hemmecke/fricas/tree/formatted
-
-which includes code for a better MathJax_ support.
