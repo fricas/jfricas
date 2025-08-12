@@ -1,0 +1,7 @@
+[build-system]
+requires = [
+    'setuptools',
+    'jupyter_client',
+    'ipython',
+]
+build-backend = "setuptools.build_meta"
