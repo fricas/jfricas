@@ -86,9 +86,15 @@
 ;  (setf |$printTypeIfTrue| T)    ; Make sure we get "Type:" line.
 ;  (setf |$printTimeIfTrue| T)    ; Make sure we get "Time:" line.
   (setf |$printStorageIfTrue| T) ; Make sure we get "Storage:" line.
-  (setf |$fortranFormat| NIL)    ; we don't want Fortran output
-  (setf |$htmlFormat| NIL)       ; we don't want Html output
-  (setf |$openMathFormat| NIL)   ; we don't want OpenMath output
+  ;;; we don't want Fortran, Html, OpenMath output
+  (if (boundp '|$fortran_out_rec|)
+      ;;; newer FriCAS: on/off flag is slot 2 of the output record
+      (dolist (r '(|$fortran_out_rec| |$html_out_rec| |$openmath_out_rec|))
+        (when (boundp r) (setf (aref (symbol-value r) 2) NIL)))
+      (progn
+        (setf |$fortranFormat| NIL)
+        (setf |$htmlFormat| NIL)
+        (setf |$openMathFormat| NIL)))
   (setf |$MARGIN| 0)             ; we don't want indentation
   (setf |$print_equatnum| NIL)   ; we don't want indentation
 
@@ -120,46 +126,53 @@
 ;;; One stream that catches all output.
 (defvar webspad-stream (make-string-output-stream))
 
+;;; Newer FriCAS keeps each output stream in slot 0 of a record
+;;; boot::|$<format>_out_rec| as (NIL . lisp-stream) instead of in
+;;; variables like boot::|$algebraOutputStream|.
+(defvar webspad-out-recs
+  '(boot::|$algebra_out_rec| boot::|$tex_out_rec| boot::|$mathml_out_rec|
+    boot::|$texmacs_out_rec| boot::|$formatted_out_rec|))
+
+(defvar webspad-old-stream-vars
+  '(boot::|$algebraOutputStream| boot::|$texOutputStream|
+    boot::|$mathmlOutputStream| boot::|$texmacsOutputStream|
+    boot::|$formattedOutputStream|))
+
 (defun webspad-eval (input)
   (let* (
         ;;; store original input argument
          (data (make-r :input input))
-         ;;; Because we want to read from the fricas streams via
-         ;;; get-output-stream-string, we must make sure that the
-         ;;; streams are created via make-string-output-stream.
-         ;;; Therefore, we first save the original streams.
-         ;;; If |$formattedOutputStream| is not in the FriCAS code base,
-         ;;; then that stream is not considered.
-         (formattedp (boundp 'boot::|$formattedOutputStream|))
-         (s-formatted (if formattedp boot::|$formattedOutputStream|))
-         (s-stdout    boot::*standard-output*)
-         (s-stderr    boot::*error-output*)
-         (s-algebra   boot::|$algebraOutputStream|)
-         (s-tex       boot::|$texOutputStream|)
-         (s-mathml    boot::|$mathmlOutputStream|)
-         (s-texmacs   boot::|$texmacsOutputStream|)
+         (newp (boundp 'boot::|$algebra_out_rec|))
+         (recs (remove-if-not #'boundp webspad-out-recs))
+         (vars (remove-if-not #'boundp webspad-old-stream-vars))
+         ;;; save the original streams
+         (saved (if newp
+                    (mapcar (lambda (r) (aref (symbol-value r) 0)) recs)
+                    (mapcar #'symbol-value vars)))
          (boot::*OBEY-STDOUT* T)
          (*standard-output* webspad-stream)
          (*error-output* *standard-output*)
-         (s           (boot::|mkOutputConsoleStream|))) ; use *standard-output*
+         (s (if newp
+                (cons nil *standard-output*)
+                (boot::|mkOutputConsoleStream|)))) ; use *standard-output*
 
-    ;;; create empty streams
-    (setf boot::|$algebraOutputStream|   s)
-    (setf boot::|$texOutputStream|       s)
-    (setf boot::|$mathmlOutputStream|    s)
-    (setf boot::|$texmacsOutputStream|   s)
-    (if formattedp (setf boot::|$formattedOutputStream| s))
+    (unwind-protect
+         (progn
+           ;;; redirect all format streams to our string stream
+           (if newp
+               (dolist (r recs) (setf (aref (symbol-value r) 0) s))
+               (dolist (v vars) (setf (symbol-value v) s)))
+           ;;; eval and return true if there was an error
+           (setf (r-error? data)
+                 (if (boot::|webspad-parseAndEvalStr| input) "T" "F")))
+      ;;; restore the original streams
+      (if newp
+          (loop for r in recs for o in saved
+                do (setf (aref (symbol-value r) 0) o))
+          (loop for v in vars for o in saved
+                do (setf (symbol-value v) o))))
 
-    ;;; eval and return true if there was an error
-    (setf (r-error? data) (if (boot::|webspad-parseAndEvalStr| input) "T" "F"))
-
-    (setf (r-stdout data) (get-output-stream-string boot::*standard-output*))
-    (if formattedp (setf boot::|$formattedOutputStream| s-formatted))
-
-    (setf boot::|$algebraOutputStream|   s-algebra)
-    (setf boot::|$texOutputStream|       s-tex)
-    (setf boot::|$mathmlOutputStream|    s-mathml)
-    (setf boot::|$texmacsOutputStream|   s-texmacs)
+    (setf (r-stdout data) (get-output-stream-string webspad-stream))
 
     ;;; return the data record
     data))
